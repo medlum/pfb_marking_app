@@ -22,6 +22,7 @@ client = InferenceClient(token=st.secrets.api_keys.huggingfacehub_api_token)
 with st.sidebar:
     st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
     st.subheader(f":blue[*PFB Individual Assignment Only*]")
+    st.write(":red[*Upload a zip file up class level*]")
     model_id = st.selectbox(":grey[Select an AI model]", 
                             ["Qwen/Qwen2.5-72B-Instruct",
                              "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",

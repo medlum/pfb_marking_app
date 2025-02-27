@@ -39,6 +39,7 @@ for msg in st.session_state.msg_history:
 with st.sidebar:
     st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
     st.subheader(":blue[*Research Report Only*]")
+    st.write(":red[*Upload one report in docx or PDF*]")
     model_id = st.selectbox(":gray[Select an AI model]",
                             ["Qwen/Qwen2.5-72B-Instruct",
                              "meta-llama/Llama-3.3-70B-Instruct",

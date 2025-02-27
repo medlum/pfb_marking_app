@@ -16,7 +16,7 @@ login_page = st.Page(login, title="Log in", icon=":material/login:")
 logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
 
 group_project = st.Page("components/group_project.py", 
-                   title="Group Project : python code", 
+                   title="Group Project -  Python code", 
                    icon=":material/terminal:", 
                    default=True)
 
@@ -25,7 +25,7 @@ individual_assignment = st.Page("components/individual_assignment.py",
                    icon=":material/code_blocks:")
 
 research_report = st.Page("components/research_report.py", 
-                   title="Group Project : research report", 
+                   title="Group Project - Research report", 
                    icon=":material/description:")
 
 if st.session_state.logged_in:
