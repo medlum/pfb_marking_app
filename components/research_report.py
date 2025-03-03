@@ -155,18 +155,20 @@ if user_input := (st.chat_input("How would you like to refine the report?") or b
                 if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
                     collected_response += chunk.choices[0].delta.content
                     st.chat_message("assistant").write(collected_response)
-            st.session_state.msg_history.append({
-                "role": "assistant", "content": collected_response
-            })
+           
+        del st.session_state.msg_history
+
     except Exception as e:
         st.error(f"Error generating response: {e}")
+    
 
-if clear_btn:
-    try:
-        del st.session_state.msg_history
-        st.rerun()
-    except Exception as e:
-        st.error(f"Error clearing history: {e}")
+
+#if clear_btn:
+#    try:
+#        del st.session_state.msg_history
+#        st.rerun()
+#    except Exception as e:
+#        st.error(f"Error clearing history: {e}")
 
 
 

@@ -69,6 +69,9 @@ if group_zip is not None:
         st.session_state.msg_history.append({"role": "user", 
                                             "content": f"{extracted_contents[key]}" })
         
+        st.session_state.msg_history.append({"role": "user", 
+                                            "content": f"Mark the report with high standard and be stringent when awarding marks." })
+        
 
         st.subheader(f":blue[{key}]")
 
@@ -96,7 +99,7 @@ if group_zip is not None:
                         stream = client.chat_completion(
                             model=model_id,
                             messages=st.session_state.msg_history,
-                            temperature=0.6,
+                            temperature=0.2,
                             max_tokens=5524,
                             top_p=0.7,
                             stream=True
