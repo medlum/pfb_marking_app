@@ -4,11 +4,10 @@ import requests
 import streamlit as st
 from pathlib import Path
 import shutil
+from group_utils import intro_var
 
 extracted_files_path = Path("./extracted_files")
 extracted_pyfiles_path = Path("./extracted_pyfiles")
-import streamlit as st
-
 
 def find_user_credentials(user_id, password):
     users = st.secrets["users"]
@@ -19,8 +18,10 @@ def find_user_credentials(user_id, password):
     return None
 
 def login():
-    user_id = st.text_input(f":blue[User ID]")
-    password = st.text_input(":blue[Password]", type="password")
+    col1, col2, col3 = st.columns([1,1,1])
+    col2.subheader(":orange[Assistive AI Marking Tool]", help=intro_var)
+    user_id = col2.text_input(f":gray[User ID]")
+    password = col2.text_input(":gray[Password]", type="password")
     login_state = find_user_credentials(user_id, password)
     if login_state:
         with st.status("Logging in...", expanded=False):

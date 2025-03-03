@@ -37,9 +37,9 @@ for msg in st.session_state.msg_history:
 
 # ------- create side bar --------#
 with st.sidebar:
-    st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
-    st.subheader(":blue[*Research Report Only*]")
-    st.write(":red[*Upload one report in docx or PDF*]")
+    #st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
+    st.subheader("PFB Research Report")
+    #st.write(":gray[*Upload as a single report in .docx or .pdf*]")
     model_id = st.selectbox(":gray[Select an AI model]",
                             ["Qwen/Qwen2.5-72B-Instruct",
                              "meta-llama/Llama-3.3-70B-Instruct",
@@ -51,7 +51,7 @@ with st.sidebar:
    #     ":blue[**Upload marking rubrics**]", 'pdf', help=rubrics_help)
     
     upload_student_report = st.file_uploader(
-        ":gray[Upload a report (docx or PDF)]", type=['docx', 'pdf'])
+        ":gray[Upload a reseach report (single file in .docx or .pdf)]", type=['docx', 'pdf'])
 
     evaluate_btn = st.button(
         ":material/search_insights: Evaluate Report", type="primary")
@@ -96,6 +96,7 @@ if upload_student_report is not None:
             reader = PdfReader(upload_student_report)
             for page in reader.pages:
                 student_report += page.extract_text()
+            #st.write(student_report)
             st.session_state.msg_history.append({
                 "role": "system",
                 "content": f"Mark this report: {student_report}"

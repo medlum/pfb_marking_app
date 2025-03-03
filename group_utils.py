@@ -142,9 +142,9 @@ def extract_and_read_files(main_zip_path):
                             st.warning("Unable to generate summary reports")
                 else: 
                     for file in subfolder.parent.glob("*.txt"):
-                            if 'summary' in file.stem.lower():
-                                with open(file, "r", encoding="utf-8") as f:
-                                    extracted_data[folder_name]["summary"].append("MAIN.PY NOT FOUND")
+                        if 'summary' in file.stem.lower():
+                            with open(file, "r", encoding="utf-8") as f:
+                                extracted_data[folder_name]["summary"].append("MAIN.PY NOT FOUND")
     return extracted_data
 
 

@@ -40,7 +40,7 @@ system_message_output = """
 """
 
 mark_rubrics_output_decreasing = """
-1.⁠ Correct ⁠output and the marking rubrics for 'decreasing trend' data: (Max 2 marks)
+1. Correct output and the marking rubrics for 'decreasing trend' data: (Max 2 marks)
 
 [HIGHEST OVERHEAD] RENTAL EXPENSE: 25.97%
 [CASH DEFICIT] CASH ON EACH DAY IS LOWER THAN THE PREVIOUS DAY
@@ -56,7 +56,7 @@ mark_rubrics_output_decreasing = """
 """
 
 mark_rubrics_output_increasing = """
-2.⁠ Correct ⁠output and the marking rubrics for 'increasing trend' data: (Max 2 marks)
+2. Correct output and the marking rubrics for 'increasing trend' data: (Max 2 marks)
 
 [HIGHEST OVERHEAD] RENTAL EXPENSE: 25.97%
 [CASH SURPLUS] CASH ON EACH DAY IS HIGHER THAN THE PREVIOUS DAY
@@ -132,28 +132,28 @@ mark_rubrics_list = [mark_rubrics_output_decreasing,
 
 mark_rubrics_code = """
 
-1.⁠ ⁠Code Readability (Max 2 marks)
+1. Code Readability (Max 2 marks)
 - 1.6 marks - 2 marks: Excellent readability, meaningful names, consistent formatting, proper indentation, clear inline comments.
 - 1.4 to less than 1.6 marks: Mostly readable, minor inconsistencies in formatting or naming, limited comments for complex logic.
 - 1.2 to less than 1.4 marks: Some readability issues, inconsistent spacing, missing comments, unclear variable names.
 - 1 to less than 1.2 marks: Hard to read, lack of indentation, poor naming, minimal commenting, messy structure.
 - Less than 1 marks: Very poor readability, no comments, unreadable formatting, confusing structure.
 
-2.⁠ ⁠Code Efficiency (Max 5 marks)
+2. ⁠Code Efficiency (Max 5 marks)
 - 4 marks - 5 marks: Highly optimized, efficient algorithms, no redundant computations, uses built-in functions properly, write meaningful functions to reduce repeating codes.
 - 3.5 to less than 4 marks: Mostly efficient, minor unnecessary loops or operations, some scope for optimization.
 - 3 to less than 3.5 marks: Correct logic but inefficient, unnecessary loops, redundant calculations, poor data structures.
 - 2.5 to less than 3 marks: Inefficient code, high time complexity, excessive memory use, performance issues.
 - Less than 2.5 marks: Highly inefficient, repetitive computations, excessive memory use, brute force solutions.
 
-3.⁠ ⁠Documentation (Max 3 marks)
+3. ⁠Documentation (Max 3 marks)
 - 2.4 marks - 3 marks: Well-structured documentation, clear docstrings, meaningful comments, algorithm explanations.
 - 2.1 to less than 2.4 marks: Mostly well-documented, but some function docstrings or explanations may be missing.
 - 1.8 to less than 2.1 marks: Some documentation present but lacks details in function descriptions or inline comments.
 - 1.5 to less than 1.8 marks: Minimal documentation, few comments, missing docstrings for key functions.
 - Less than 1.5 marks: No meaningful documentation, missing docstrings, no explanation of the code.
 
-4.⁠ ⁠Assignment Specifications (Max 3 marks)
+4. ⁠Assignment Specifications (Max 3 marks)
 - 2.4 marks - 3 marks: Fully meets all assignment requirements, for example:
     -- Filename convention: 'summary_report.txt' are used when writing output to file.
     -- Did not import additional python modules except for 'csv' and 'pathlib' modules.

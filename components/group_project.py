@@ -18,16 +18,16 @@ client = InferenceClient(token=st.secrets.api_keys.huggingfacehub_api_token)
 
 # ------- create side bar --------#
 with st.sidebar:
-    st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
-    st.subheader(f":blue[*PFB Group Assignment Only*]")
-    st.write(":red[*Upload a zip file by project group*]")
+    #st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
+    st.subheader(f"PFB Group Assignment")
+    #st.write(":gray[*Upload by project group in a zip file*]")
     model_id = st.selectbox(":grey[Select an AI model]", 
                             ["Qwen/Qwen2.5-72B-Instruct",
                              "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
                              "meta-llama/Llama-3.3-70B-Instruct"],
                             index=2,
                             help=model_help)
-    upload_student_report = st.file_uploader(":grey[Upload a zip file]", type=["zip"], help=zip_help)
+    upload_student_report = st.file_uploader(":grey[Upload a zip file (by project group level)]", type=["zip"], help=zip_help)
     #evaluate_btn = st.button(":material_search_insights: Evaluate Report", type="primary")
     #clear_btn = st.button(":material_refresh: Clear History", type="primary")
     st.markdown(f'<span style="font-size:12px; color:gray;">{disclaimer_var}</span>', unsafe_allow_html=True)
@@ -90,6 +90,7 @@ if upload_student_report:
                         st.code(item[1])
 
                     # marking the output by llm
+                    
                     with st.status(f"Evaluating {item[0]}", expanded=True) as status:
                         with st.empty():
                             stream = client.chat_completion(

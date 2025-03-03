@@ -20,9 +20,9 @@ client = InferenceClient(token=st.secrets.api_keys.huggingfacehub_api_token)
 
 # create sidebar for upload, clear messages
 with st.sidebar:
-    st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
-    st.subheader(f":blue[*PFB Individual Assignment Only*]")
-    st.write(":red[*Upload a zip file up class level*]")
+    #st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
+    st.subheader(f"PFB Individual Assignment")
+    #st.write(":gray[*(Upload by class as a zip file)*]")
     model_id = st.selectbox(":grey[Select an AI model]", 
                             ["Qwen/Qwen2.5-72B-Instruct",
                              "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
@@ -30,7 +30,7 @@ with st.sidebar:
                             index=2,
                             help=model_help)
     
-    upload_student_report = st.file_uploader(":grey[Upload a ZIP file]", type=["zip"], help=upload_help)
+    upload_student_report = st.file_uploader(":grey[Upload a ZIP file (by class level)]", type=["zip"], help=upload_help)
     #evaluate_btn = st.button(":material_search_insights: Evaluate Report", type="primary")
     #clear_btn = st.button(":material_refresh: Clear History", type="primary")
     st.markdown(f'<span style="font-size:12px; color:gray;">{disclaimer_var}</span>', unsafe_allow_html=True)

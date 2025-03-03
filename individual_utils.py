@@ -28,7 +28,7 @@ def extract_and_read_files(zip_path):
             # extract student name from the each subfolder
             # which contains name as standard label from brightspace 
             folder_name = str(folder.relative_to(extract_folder))
-            cleaned_text = re.sub(r"\b(BA|NP|PM)\b", "", folder_name)
+            cleaned_text = re.sub(r"\b(BA|NP|PM|AM)\b", "", folder_name)
             cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
             student_name = " ".join(re.findall(r"\b[A-Z]+\b", cleaned_text))
             
