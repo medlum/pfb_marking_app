@@ -55,7 +55,7 @@ with st.sidebar:
 
     evaluate_btn = st.button(
         ":material/search_insights: Evaluate Report", type="primary")
-    clear_btn = st.button(":material/refresh: Clear History", type="primary")
+    #clear_btn = st.button(":material/refresh: Clear History", type="primary")
     st.markdown(
         f'<span style="font-size:12px; color:gray;">{disclaimer_var}</span>', unsafe_allow_html=True)
 
