@@ -5,19 +5,25 @@ from streamlit_pdf_viewer import pdf_viewer
 from docx import Document
 from intern_reflection_report_utils import *
 import ast
+from twilio_utils import floating_button_css,floating_button_html
 
 # ---------set css-------------#
 st.markdown(btn_css, unsafe_allow_html=True)
-st.markdown(image_css, unsafe_allow_html=True)
+#st.markdown(image_css, unsafe_allow_html=True)
+
+# buymecoffee button
+st.markdown(floating_button_css, unsafe_allow_html=True)
+st.markdown(floating_button_html, unsafe_allow_html=True)
 
 # --- Initialize the Inference Client with the API key ----#
+# Initialize the Inference Client with the API key 
 try:
-    client = InferenceClient(
-        token=st.secrets.api_keys.huggingfacehub_api_token)
+    client = InferenceClient(token=st.session_state.hf_access_token[0])
+    
 except Exception as e:
     st.error(f"Error initializing Inference Client: {e}")
     st.stop()
-
+    
 
 # ------- create side bar --------#
 with st.sidebar:
@@ -82,26 +88,33 @@ if group_zip is not None:
         if evaluate_btn:
             try:
                 with st.status("Evaluating report...", expanded=True) as status:
+
                     with st.empty():
-                        stream = client.chat_completion(
-                            model=model_id,
-                            messages=st.session_state.msg_history,
-                            temperature=0.2,
-                            max_tokens=5524,
-                            top_p=0.7,
-                            stream=True
-                            )
-                        collected_response = ""
-                        for chunk in stream:
-                            if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                                collected_response += chunk.choices[0].delta.content
-                                st.text(collected_response.replace('{','').replace('}','').replace("'",""))
+
+                        try:
+                            stream = client.chat_completion(
+                                model=model_id,
+                                messages=st.session_state.msg_history,
+                                temperature=0.2,
+                                max_tokens=5524,
+                                top_p=0.7,
+                                stream=True
+                                )
+                            
+                            collected_response = ""
+                            
+                            for chunk in stream:
+                                if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
+                                    collected_response += chunk.choices[0].delta.content
+                                    st.text(collected_response.replace('{','').replace('}','').replace("'",""))
+                            
+                            actual_dict = ast.literal_eval(collected_response)
+                            data.append(actual_dict)
+                            status.update(label="Report evaluation completed...", state="complete", expanded=False)
                         
-                        actual_dict = ast.literal_eval(collected_response)
-                        data.append(actual_dict)
-                    
-                        status.update(label="Report evaluation completed...", state="complete", expanded=False)
-            
+                        except Exception as e:
+                            st.error(e)
+
             except Exception as e:
                 st.error(f"Error generating response: {e}")
             

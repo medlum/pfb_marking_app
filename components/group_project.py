@@ -4,17 +4,24 @@ from group_sys_msg import *
 from group_utils import *
 import ast
 import pandas as pd
+from twilio_utils import floating_button_css,floating_button_html
 
-#st.set_page_config(page_title="Assistive Marking AI Tool",
-#                   layout="wide",
-#                   initial_sidebar_state="expanded")
 
-# ---------set css-------------#
+
+# ---------set css and buy me coffee-------------#
 st.markdown(btn_css, unsafe_allow_html=True)
-st.markdown(image_css, unsafe_allow_html=True)
+#st.markdown(image_css, unsafe_allow_html=True)
 
+# buymecoffee button
+st.markdown(floating_button_css, unsafe_allow_html=True)
+st.markdown(floating_button_html, unsafe_allow_html=True)
 # --- Initialize the Inference Client with the API key ----#
-client = InferenceClient(token=st.secrets.api_keys.huggingfacehub_api_token)
+try:
+    client = InferenceClient(token=st.session_state.hf_access_token[0])
+    
+except Exception as e:
+    st.error(f"Error initializing Inference Client: {e}")
+    st.stop()
 
 # ------- create side bar --------#
 with st.sidebar:
@@ -93,36 +100,49 @@ if upload_student_report:
                     
                     with st.status(f"Evaluating {item[0]}", expanded=True) as status:
                         with st.empty():
-                            stream = client.chat_completion(
-                                model=model_id,
-                                messages=st.session_state.msg_history_output,
-                                temperature=0.1,
-                                max_tokens=5524,
-                                top_p=0.7,
-                                stream=True,
-                            )
+                            try:
+                                stream = client.chat_completion(
+                                    model=model_id,
+                                    messages=st.session_state.msg_history_output,
+                                    temperature=0.1,
+                                    max_tokens=5524,
+                                    top_p=0.7,
+                                    stream=True,
+                                )
+                                
+                                collected_response = ""
+
+                                for chunk in stream:
+                                    if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
+                                        collected_response += chunk.choices[0].delta.content
+                                        st.text(collected_response.replace('{','').replace('}',''))
+
+                                # Convert string to dict
+                                output_dict = ast.literal_eval(collected_response)
+                                # append to program_correctness_data
+                                program_correctness_data.append(output_dict)
+                                # delete 'msg_history_output' after marking each output
+                                del st.session_state.msg_history_output
+                                status.update(label=f"Evaluation completed for {item[0]}...", state="complete", expanded=True)
                             
-                            collected_response = ""
-
-                            for chunk in stream:
-                                if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                                    collected_response += chunk.choices[0].delta.content
-                                    st.text(collected_response.replace('{','').replace('}',''))
-
-                            # Convert string to dict
-                            output_dict = ast.literal_eval(collected_response)
-                            # append to program_correctness_data
-                            program_correctness_data.append(output_dict)
-                            # delete 'msg_history_output' after marking each output
-                            del st.session_state.msg_history_output
-
-                        status.update(label=f"Evaluation completed for {item[0]}...", state="complete", expanded=True)
+                            except Exception as e:
+                                st.error(e)
+                                
+                        #sms_txt = f"⚠️ <{st.session_state.user_id}> Output evaluation ✅"
+                        #send_sms_txt(sms_txt)
             
             except Exception as e:
+                # create 'msg_history_output' for marking the output
+                if 'msg_history_output' not in st.session_state:
+                    st.session_state.msg_history_output = []
 
                 st.session_state.msg_history_output.append({"role": "user", 
                                                             "content": f"Fail to generate output from the python code"})
+                
                 st.error(f":red[*Unable to generate summary reports*]")
+                
+                #sms_txt = f"⚠️ <{st.session_state.user_id}> Summary reports ❌"
+                #send_sms_txt(sms_txt)
 
             #-------- code section for the marking of python code ------#
             st.write("---")
@@ -152,27 +172,30 @@ if upload_student_report:
             # llm to mark all three files of python code 
             with st.status("Evaluating...", expanded=True) as status:
                 with st.empty():
-                    stream = client.chat_completion(
-                        model=model_id,
-                        messages=st.session_state.msg_history_code,
-                        temperature=0.1,
-                        max_tokens=5524,
-                        top_p=0.7,
-                        stream=True,
-                    )
-                    
-                    collected_response = ""
+                    try:
+                        stream = client.chat_completion(
+                            model=model_id,
+                            messages=st.session_state.msg_history_code,
+                            temperature=0.1,
+                            max_tokens=5524,
+                            top_p=0.7,
+                            stream=True,
+                        )
+                        
+                        collected_response = ""
 
-                    for chunk in stream:
-                        if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                            collected_response += chunk.choices[0].delta.content
-                            st.text(collected_response.replace('{','').replace('}',''))
+                        for chunk in stream:
+                            if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
+                                collected_response += chunk.choices[0].delta.content
+                                st.text(collected_response.replace('{','').replace('}',''))
 
-                    # Convert string to dict
-                    code_dict = ast.literal_eval(collected_response)
-                    # del msg_history_code
-                    del st.session_state.msg_history_code
-                    status.update(label="Evaluation completed for code...", state="complete", expanded=True)
+                        # Convert string to dict
+                        code_dict = ast.literal_eval(collected_response)
+                        # del msg_history_code
+                        del st.session_state.msg_history_code
+                        status.update(label="Evaluation completed for code...", state="complete", expanded=True)
+                    except Exception as e:
+                        st.error(e)
       
 
 if program_correctness_data:
@@ -197,7 +220,8 @@ if program_correctness_data:
     st.subheader(f":red[Marks Summary]")
     st.dataframe(output)
     st.write(f":grey[*Program Correctness is the sum of the output marks from evaluation of summary_report.txt*]")
-    
+    #sms_txt = f"⚠️ <{st.session_state.user_id}> Marks Summary ✅"
+    #send_sms_txt(sms_txt)
 
 # code_dict is a dict the generated responses from llm 
 # { 'Team_members': ,

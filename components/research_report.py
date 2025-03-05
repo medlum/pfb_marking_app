@@ -5,19 +5,24 @@ from pypdf import PdfReader
 from streamlit_pdf_viewer import pdf_viewer
 from docx import Document
 from research_report_sys_msg import *
+from twilio_utils import floating_button_html,floating_button_css
 
 # ---------set css-------------#
 st.markdown(btn_css, unsafe_allow_html=True)
-st.markdown(image_css, unsafe_allow_html=True)
+#st.markdown(image_css, unsafe_allow_html=True)
 
-# --- Initialize the Inference Client with the API key ----#
+# buymecoffee button
+st.markdown(floating_button_css, unsafe_allow_html=True)
+st.markdown(floating_button_html, unsafe_allow_html=True)
+
+# Initialize the Inference Client with the API key 
 try:
-    client = InferenceClient(
-        token=st.secrets.api_keys.huggingfacehub_api_token)
+    client = InferenceClient(token=st.session_state.hf_access_token[0])
+    
 except Exception as e:
     st.error(f"Error initializing Inference Client: {e}")
     st.stop()
-
+    
 
 # ------- initialize first system message --------#
 if 'msg_history' not in st.session_state:
@@ -53,8 +58,8 @@ with st.sidebar:
     upload_student_report = st.file_uploader(
         ":gray[Upload a reseach report (single file in .docx or .pdf)]", type=['docx', 'pdf'])
 
-    evaluate_btn = st.button(
-        ":material/search_insights: Evaluate Report", type="primary")
+    #evaluate_btn = st.button(
+    #    ":material/search_insights: Evaluate Report", type="primary")
     #clear_btn = st.button(":material/refresh: Clear History", type="primary")
     st.markdown(
         f'<span style="font-size:12px; color:gray;">{disclaimer_var}</span>', unsafe_allow_html=True)
@@ -105,11 +110,8 @@ if upload_student_report is not None:
             st.error(f"Error processing student report: {e}")
 
 # ------- if evaluate button click, set mark task to system --------#
-button_pressed = ""
-
-if evaluate_btn:
+#if evaluate_btn:
     try:
-
         system_message = """
         1. Your primary task is to evaluate students' written assignments based on a structured marking rubric.  
         2. Follow the instructions to mark:
@@ -126,49 +128,34 @@ if evaluate_btn:
             "role": "system", "content": f"{system_message}"
         })
 
-        button_pressed = "Mark the report."
-    
-    except Exception as e:
-        st.error(f"Error during evaluation: {e}")
-
-# ---- Input field for users to continue the conversation -----#
-if user_input := (st.chat_input("How would you like to refine the report?") or button_pressed):
-
-    st.session_state.msg_history.append(
-        {"role": "user", "content": user_input})
-    
-    if not button_pressed:
-        st.chat_message("user").write(user_input)
-    
-    try:
+        st.session_state.msg_history.append({
+            "role": "user", "content": f"Mark the report."
+        })
         with st.empty():
-            stream = client.chat_completion(
-                model=model_id,
-                messages=st.session_state.msg_history,
-                temperature=0.2,
-                max_tokens=5524,
-                top_p=0.7,
-                stream=True,
-            )
-            collected_response = ""
-            for chunk in stream:
-                if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                    collected_response += chunk.choices[0].delta.content
-                    st.chat_message("assistant").write(collected_response)
-           
-        del st.session_state.msg_history
+            try:
+                stream = client.chat_completion(
+                    model=model_id,
+                    messages=st.session_state.msg_history,
+                    temperature=0.2,
+                    max_tokens=5524,
+                    top_p=0.7,
+                    stream=True,
+                )
 
+                collected_response = ""
+
+                for chunk in stream:
+                    if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
+                        collected_response += chunk.choices[0].delta.content
+                        st.chat_message("assistant").write(collected_response)
+           
+                del st.session_state.msg_history
+
+            except Exception as e:
+                st.error(e)
+                
     except Exception as e:
         st.error(f"Error generating response: {e}")
     
-
-
-#if clear_btn:
-#    try:
-#        del st.session_state.msg_history
-#        st.rerun()
-#    except Exception as e:
-#        st.error(f"Error clearing history: {e}")
-
 
 

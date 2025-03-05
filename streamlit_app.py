@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_app_entry import *
 
+
 # Configure the Streamlit app with a title, layout, icon, and initial sidebar state
 st.set_page_config(page_title="PFB Marking App",
                    layout="wide",
@@ -11,6 +12,9 @@ if "logged_in" not in st.session_state:
 
 if "user_id" not in st.session_state:
     st.session_state.user_id = None
+
+if "hf_access_token" not in st.session_state:
+    st.session_state.hf_access_token = None
 
 # set up nav page (login is located utils_entry_pt.py)
 
@@ -40,8 +44,9 @@ intern_reflection_report = st.Page("components/intern_reflection_report.py",
 
 
 
+
 if st.session_state.logged_in:
-    
+
     st.sidebar.title(":orange[Assistive AI Marking Tool]", help=intro_var)
     #st.sidebar.text_input("Enter huggingface token")
 

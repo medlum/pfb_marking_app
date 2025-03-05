@@ -205,3 +205,18 @@ summary_report_var = "Use it as a reference source when evaluating the summary r
 
 main_py_error = ":red[*Error running 'main.py'. It could be missing python files or code errors like IndexError during the program execution using our test data*]."
 
+app_usage_text = """
+
+This app is free to use, but permission is required before access. 
+Upon approval, you will receive a User ID and Password. 
+To request access, please email: andy_oh18@yahoo.com.\n
+
+This app relies on HuggingFace endpoint API for model inference. 
+By default, users will utilize the developer's access token. 
+However, frequent usage may hit token limits, impacting performance and availability.
+For a more reliable experience, we recommend subscribing to a Hugging Face Pro account for $9 per month and generating your own access token. 
+You can start, cancel, and resume your subscription anytime.
+Once you have your access token, enter it in the access token field to proceed.
+
+Learn more: https://huggingface.co
+"""

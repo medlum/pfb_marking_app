@@ -4,20 +4,23 @@ from individual_utils import *
 from individual_sys_msg import *
 from charset_normalizer import from_path
 import ast
-
-# set up page config
-#st.set_page_config(page_title="Assistive Marking AI Tool",
-#                   layout="wide",
-#                   initial_sidebar_state="expanded")
-
+from twilio_utils import floating_button_css,floating_button_html
 
 # setup css
 st.markdown(btn_css, unsafe_allow_html=True)
-st.markdown(image_css, unsafe_allow_html=True)
+#st.markdown(image_css, unsafe_allow_html=True)
+# buymecoffee button
+st.markdown(floating_button_css, unsafe_allow_html=True)
+st.markdown(floating_button_html, unsafe_allow_html=True)
 
 # Initialize the Inference Client with the API key 
-client = InferenceClient(token=st.secrets.api_keys.huggingfacehub_api_token)
-
+try:
+    client = InferenceClient(token=st.session_state.hf_access_token[0])
+    
+except Exception as e:
+    st.error(f"Error initializing Inference Client: {e}")
+    st.stop()
+    
 # create sidebar for upload, clear messages
 with st.sidebar:
     #st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
@@ -76,28 +79,31 @@ if upload_student_report:
        
         # evaluate student's python code 
         with st.status("Evaluating code...", expanded=True) as status:
-            with st.empty():
-                stream = client.chat_completion(
-                    model=model_id,
-                    messages=st.session_state.msg_history_code,
-                    temperature=0.1,
-                    max_tokens=5524,
-                    top_p=0.7,
-                    stream=True,
-                )
-                
-                collected_response = ""
+            try:
+                with st.empty():
+                    stream = client.chat_completion(
+                        model=model_id,
+                        messages=st.session_state.msg_history_code,
+                        temperature=0.1,
+                        max_tokens=5524,
+                        top_p=0.7,
+                        stream=True,
+                    )
+                    
+                    collected_response = ""
 
-                for chunk in stream:
-                    if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                        collected_response += chunk.choices[0].delta.content
-                        st.text(collected_response.replace('{','').replace('}',''))
+                    for chunk in stream:
+                        if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
+                            collected_response += chunk.choices[0].delta.content
+                            st.text(collected_response.replace('{','').replace('}',''))
 
-                # Convert string to dict
-                code_dict = ast.literal_eval(collected_response)
-                del st.session_state.msg_history_code
-                status.update(label="Code evaluation completed...", state="complete", expanded=True)
-
+                    # Convert string to dict
+                    code_dict = ast.literal_eval(collected_response)
+                    del st.session_state.msg_history_code
+                    status.update(label="Code evaluation completed...", state="complete", expanded=True)
+            
+            except Exception as e:
+                                st.error(e)
 
         # append system instruction, student's name and rubrics to history        
         st.session_state.msg_history_output.append({"role": "system", "content": f"{system_message_output}"})   
@@ -121,26 +127,31 @@ if upload_student_report:
         # evaluate student's output
         with st.status("Evaluating output...", expanded=True) as status:
             with st.empty():
-                stream = client.chat_completion(
-                    model=model_id,
-                    messages=st.session_state.msg_history_output,
-                    temperature=0.1,
-                    max_tokens=5524,
-                    top_p=0.7,
-                    stream=True,
-                )
                 
-                collected_response = ""
+                try:
+                    stream = client.chat_completion(
+                        model=model_id,
+                        messages=st.session_state.msg_history_output,
+                        temperature=0.1,
+                        max_tokens=5524,
+                        top_p=0.7,
+                        stream=True,
+                    )
+                    
+                    collected_response = ""
 
-                for chunk in stream:
-                    if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                        collected_response += chunk.choices[0].delta.content
-                        st.text(collected_response.replace('{','').replace('}',''))
+                    for chunk in stream:
+                        if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
+                            collected_response += chunk.choices[0].delta.content
+                            st.text(collected_response.replace('{','').replace('}',''))
 
-                # Convert string to dict
-                output_dict = ast.literal_eval(collected_response)
-                del st.session_state.msg_history_output
-                status.update(label="Output evaluation completed...", state="complete", expanded=True)
+                    # Convert string to dict
+                    output_dict = ast.literal_eval(collected_response)
+                    del st.session_state.msg_history_output
+                    status.update(label="Output evaluation completed...", state="complete", expanded=True)
+
+                except Exception as e:
+                    st.error(e)
         
         # Concatentate code_dict and output_dict to combine the evaluation for one student
         merged_data = {**code_dict, **output_dict}
