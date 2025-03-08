@@ -1,43 +1,34 @@
 import streamlit as st
 from huggingface_hub import InferenceClient
-from group_sys_msg import *
-from group_utils import *
+from pfb_group_sys_msg import *
+from pfb_group_utils import *
 import ast
 import pandas as pd
-from twilio_utils import floating_button_css,floating_button_html
+from utils_twilio_coffee import buymecoffee_btn_css, buymecoffee
+from utils_inference import initialize_inferenceclient, model_list
+from utils_help_msg import *
 
 
-
-# ---------set css and buy me coffee-------------#
-st.markdown(btn_css, unsafe_allow_html=True)
-#st.markdown(image_css, unsafe_allow_html=True)
-
-# buymecoffee button
-st.markdown(floating_button_css, unsafe_allow_html=True)
-st.markdown(floating_button_html, unsafe_allow_html=True)
 # --- Initialize the Inference Client with the API key ----#
-try:
-    client = InferenceClient(token=st.session_state.hf_access_token[0])
-    
-except Exception as e:
-    st.error(f"Error initializing Inference Client: {e}")
-    st.stop()
+client = initialize_inferenceclient()
+
 
 # ------- create side bar --------#
 with st.sidebar:
     #st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
     st.subheader(f"PFB Group Assignment")
     #st.write(":gray[*Upload by project group in a zip file*]")
-    model_id = st.selectbox(":grey[Select an AI model]", 
-                            ["Qwen/Qwen2.5-72B-Instruct",
-                             "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
-                             "meta-llama/Llama-3.3-70B-Instruct"],
-                            index=2,
+    model_id = st.selectbox(":grey[AI model]", 
+                            model_list,
+                            index=0,
                             help=model_help)
+    
+
     upload_student_report = st.file_uploader(":grey[Upload a zip file (by project group level)]", type=["zip"], help=zip_help)
-    #evaluate_btn = st.button(":material_search_insights: Evaluate Report", type="primary")
-    #clear_btn = st.button(":material_refresh: Clear History", type="primary")
     st.markdown(f'<span style="font-size:12px; color:gray;">{disclaimer_var}</span>', unsafe_allow_html=True)
+    st.markdown(buymecoffee_btn_css, unsafe_allow_html=True)
+    if st.button("☕ Buy me coffee"):
+        buymecoffee()
 
 # to store marks from each output
 program_correctness_data = []

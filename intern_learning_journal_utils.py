@@ -130,16 +130,3 @@ image_css = """
 </style>
 
 """
-
-intro_var = """
-:blue[While AI marking can help with consistency and efficiency, it's crucial to review and verify the marks and feedback generated.]
-"""
-
-disclaimer_var = "Disclaimer: This AI-powered tool is designed to assist in marking reports by providing helpful suggestions and evaluations. However, it may occasionally make errors or misinterpret content. Final judgment and accuracy should be verified by a qualified evaluator."
-
-
-model_help = ":blue[Models with less parameters have faster inference speed but often at the expense of a more quality answer.]"
-
-rubrics_help = ":blue[Upload a set of marking rubrics with a **criterion** column in PDF.]"
-
-report_help =":blue[Report with more than 3,000 words may experience '*max limit token error*'. Click on **Clear History** and try again.]"

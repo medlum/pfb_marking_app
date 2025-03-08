@@ -1,28 +1,15 @@
 import streamlit as st
 from huggingface_hub import InferenceClient
-from research_report_utils import *
+from pfb_research_report_utils import *
 from pypdf import PdfReader
-from streamlit_pdf_viewer import pdf_viewer
 from docx import Document
-from research_report_sys_msg import *
-from twilio_utils import floating_button_html,floating_button_css
-
-# ---------set css-------------#
-st.markdown(btn_css, unsafe_allow_html=True)
-#st.markdown(image_css, unsafe_allow_html=True)
-
-# buymecoffee button
-st.markdown(floating_button_css, unsafe_allow_html=True)
-st.markdown(floating_button_html, unsafe_allow_html=True)
+from pfb_research_report_sys_msg import *
+from utils_inference import initialize_inferenceclient, model_list
+from utils_twilio_coffee import buymecoffee_btn_css, buymecoffee
+from utils_help_msg import *
 
 # Initialize the Inference Client with the API key 
-try:
-    client = InferenceClient(token=st.session_state.hf_access_token[0])
-    
-except Exception as e:
-    st.error(f"Error initializing Inference Client: {e}")
-    st.stop()
-    
+client = initialize_inferenceclient()
 
 # ------- initialize first system message --------#
 if 'msg_history' not in st.session_state:
@@ -35,40 +22,33 @@ if 'msg_history' not in st.session_state:
         {"role": "system", "content": f"{system_message}"}
     )
 
-# ------- write chat conversations of session state --------#
-for msg in st.session_state.msg_history:
-    if msg['role'] != "system":
-        st.chat_message(msg["role"]).write(msg["content"])
+
 
 # ------- create side bar --------#
 with st.sidebar:
     #st.title(":orange[Assistive AI Marking Tool]", help=intro_var)
     st.subheader("PFB Research Report")
-    #st.write(":gray[*Upload as a single report in .docx or .pdf*]")
-    model_id = st.selectbox(":gray[Select an AI model]",
-                            ["Qwen/Qwen2.5-72B-Instruct",
-                             "meta-llama/Llama-3.3-70B-Instruct",
-                             "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF"],
-                            index=1,
+    model_id = st.selectbox(":grey[AI model]", 
+                            model_list,
+                            index=0,
                             help=model_help)
-
-   # upload_mark_rubric = st.file_uploader(
-   #     ":blue[**Upload marking rubrics**]", 'pdf', help=rubrics_help)
     
     upload_student_report = st.file_uploader(
         ":gray[Upload a reseach report (single file in .docx or .pdf)]", type=['docx', 'pdf'])
-
-    #evaluate_btn = st.button(
-    #    ":material/search_insights: Evaluate Report", type="primary")
-    #clear_btn = st.button(":material/refresh: Clear History", type="primary")
+    
     st.markdown(
         f'<span style="font-size:12px; color:gray;">{disclaimer_var}</span>', unsafe_allow_html=True)
+    
+    st.markdown(buymecoffee_btn_css, unsafe_allow_html=True)
+    if st.button("☕ Buy me coffee"):
+        buymecoffee()
+    
 
 # --- extract rubrics in pdf and add to session state---#
 #if upload_mark_rubric is not None:
     
 try:
-    upload_mark_rubric = './research_marking_rubrics.pdf'
+    upload_mark_rubric = './data/research_marking_rubrics.pdf'
     mark_rubric = ""
     reader = PdfReader(upload_mark_rubric)
     for page in reader.pages:
