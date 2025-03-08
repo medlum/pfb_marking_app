@@ -62,7 +62,7 @@ Every coffee means a lot, thanks for being awesome!
 @st.dialog("Why ☕ ?")
 def buymecoffee():
     st.markdown(f'<span style="font-size:14px; color:gray;">{coffee_text}</span>', unsafe_allow_html=True)
-    st.image('paynowME.jpeg')
+    st.image('./data/paynowME.jpeg')
 
 
 
