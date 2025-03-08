@@ -32,7 +32,7 @@ def extract_and_read_files(zip_path):
             cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
             student_name = " ".join(re.findall(r"\b[A-Z]+\b", cleaned_text))
             
-            shutil.copy('SpaceUsage.csv', folder)
+            shutil.copy('./data/SpaceUsage.csv', folder)
 
             for py_file in folder.glob("*.py"):  
                 

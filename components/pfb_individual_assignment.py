@@ -9,7 +9,7 @@ from utils_inference import initialize_inferenceclient, model_list
 from utils_help_msg import *
 
 # Initialize the Inference Client with the API key 
-client = initialize_inferenceclient
+client = initialize_inferenceclient()
     
 # create sidebar for upload, clear messages
 with st.sidebar:
@@ -68,6 +68,7 @@ if upload_student_report:
         st.session_state.msg_history_code.append({"role": "user", "content": f"This is the python code from the student:\n{contents["python file"]}"})
        
         # evaluate student's python code 
+
         with st.status("Evaluating code...", expanded=True) as status:
             try:
                 with st.empty():
@@ -144,9 +145,14 @@ if upload_student_report:
                     st.error(e)
         
         # Concatentate code_dict and output_dict to combine the evaluation for one student
-        merged_data = {**code_dict, **output_dict}
-        merged_data['Feedback'] = f"{code_dict['Feedback']} {output_dict['Feedback']}"
-        data.append(merged_data)
+        try:
+
+            merged_data = {**code_dict, **output_dict}
+            merged_data['Feedback'] = f"{code_dict['Feedback']} {output_dict['Feedback']}"
+            data.append(merged_data)
+
+        except Exception as e:
+            st.error(e)
 
 
 if data:
@@ -154,8 +160,4 @@ if data:
     df = process_data(data)
     st.write(df)
             
-#if clear_btn:
-#    for key in st.session_state.keys():
-#        del st.session_state[key]
-#    st.cache_data.clear()    
 
