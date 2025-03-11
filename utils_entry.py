@@ -36,7 +36,9 @@ def login():
         st.image("./data/togetherai_signup.png")
         st.write("2. Generate API key in settings")
         st.image("./data/togetherai_api.png")
-
+        st.write("3. Enable :blue[No] in Privacy and Security")
+        st.image("./data/togetherai_data_protection.png")
+        
     
     #col2.markdown(f'<span style="text-align: justify; font-size:12px; color:gray;">{app_usage_text}</span>', unsafe_allow_html=True)
     

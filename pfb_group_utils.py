@@ -9,7 +9,6 @@ from charset_normalizer import from_path
 import streamlit as st
 import pandas as pd
 
-
 def is_valid_zip(zip_path):
     """Checks if a file is a valid ZIP archive."""
     try:
@@ -147,6 +146,7 @@ def extract_and_read_files(main_zip_path):
                                 extracted_data[folder_name]["summary"].append("MAIN.PY NOT FOUND")
     return extracted_data
 
+main_py_error = ":red[*Error running 'main.py'. It could be missing python files or code errors like IndexError during the program execution using our test data*]."
 
 
 # custom CSS for buttons

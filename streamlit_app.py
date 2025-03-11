@@ -23,7 +23,7 @@ if "access_token" not in st.session_state:
 # set up nav page (login is located utils_entry_pt.py)
 
 login_page = st.Page(login, title="Log in", icon=":material/login:")
-logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
+logout_page = st.Page(logout, title="Log out (to delete data)", icon=":material/logout:")
 
 pfb_group_project = st.Page("components/pfb_group_project.py", 
                    title="PFB Group Project -  Python code", 

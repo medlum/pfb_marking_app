@@ -7,3 +7,4 @@ charset_normalizer
 python-docx
 twilio
 streamlit_extras
+pypandoc
