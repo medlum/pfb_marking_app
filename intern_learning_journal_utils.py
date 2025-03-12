@@ -9,7 +9,8 @@ from pypdf import PdfReader
 
 def extract_and_read_files(zip_path):
     # Define extraction path
-    extract_folder = "extracted_files"
+    #extract_folder = "extracted_files"
+    extract_folder = st.session_state.user_id
 
     if Path(extract_folder).exists():
         shutil.rmtree(extract_folder)
@@ -78,9 +79,10 @@ system_message = """
 2. Follow the instructions to mark:
     - Refer to the provided marking rubric to ensure accurate grading.
     - Assess each criterion separately, assigning marks accordingly.  
+    - Mark the report with a high standard.
     - Do not assign more than the maximum mark in each marking criterion.
-    - Provide a detail feedback for by identifying specific strengths and weaknesses of the report, offering constructive criticism on areas needing improvement. 
-    - Provide reasons on the marks given for each criterion.
+    - Provide a detail feedback by identifying specific strengths and weaknesses of the report, offering constructive criticism on areas needing improvement. 
+    - In your feedback, include to the student's role and company he/she is interning. 
     - Tally the marks in each criterion.
     - Comment on why the marks are given for each criteria as part of the feedback.
     - Return the marks and feedback in a dictionary : 

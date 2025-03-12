@@ -9,7 +9,8 @@ import pandas as pd
 import streamlit as st
 def extract_and_read_files(zip_path):
     # Define extraction path
-    extract_folder = f"extracted_pyfiles"
+    #extract_folder = f"extracted_pyfiles"
+    extract_folder = st.session_state.user_id
 
         # Clear previous data
     if Path(extract_folder).exists():

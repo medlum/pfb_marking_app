@@ -26,7 +26,8 @@ def extract_zip_file(zip_path, extract_folder):
         print("Invalid ZIP file.")
 
 def extract_and_read_files(main_zip_path):
-    extract_folder = "extracted_files"
+    #extract_folder = "extracted_files"
+    extract_folder = st.session_state.user_id
     
     # Clear previous extractions
     if Path(extract_folder).exists():

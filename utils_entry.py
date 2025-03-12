@@ -80,17 +80,19 @@ def logout():
 
     sms_txt = f"LOGOUT ALERT: {st.session_state.user_id}."
     send_sms_txt(sms_txt)
-
-    st.session_state.logged_in = False
-    st.session_state.user_id = None
-    st.session_state.access_token = None
      
     if Path("./extracted_files").exists():
         shutil.rmtree('./extracted_files')
 
     if Path("./extracted_pyfiles").exists():
         shutil.rmtree('./extracted_pyfiles')
+    
+    if Path(f"./{st.session_state.user_id}").exists():
+        shutil.rmtree(f"./{st.session_state.user_id}")
 
+    st.session_state.logged_in = False
+    st.session_state.user_id = None
+    st.session_state.access_token = None
     st.session_state.clear()
 
     st.rerun()
