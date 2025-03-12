@@ -38,6 +38,9 @@ def login():
         st.image("./data/togetherai_api.png")
         st.write("3. Enable :blue[No] in Privacy and Security")
         st.image("./data/togetherai_data_protection.png")
+        st.write("4. How to check credit balance?")
+        st.image("./data/togetherai_billing.png")
+
         
     
     #col2.markdown(f'<span style="text-align: justify; font-size:12px; color:gray;">{app_usage_text}</span>', unsafe_allow_html=True)

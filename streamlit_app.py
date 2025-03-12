@@ -53,18 +53,31 @@ if st.session_state.logged_in:
     st.sidebar.title(":orange[Assistive AI Marking Tool]", help=intro_var)
     #st.sidebar.text_input("Enter huggingface token")
 
-    pg = st.navigation(
-        {   
-            "Marking Components": [pfb_group_project,
-                                   pfb_research_report, 
-                                   pfb_individual_assignment, 
-                                   intern_learning_journal,
-                                   intern_reflection_report],
-                                   
-            "Account": [logout_page],
+    if st.session_state.user_id in ("zengxing" ,"charles", "lester"): 
 
-        }
-    )
+        pg = st.navigation(
+            {   
+                "Marking Components": [pfb_group_project,
+                                    pfb_research_report, 
+                                    pfb_individual_assignment, 
+                                    intern_learning_journal,
+                                    intern_reflection_report],
+                                    
+                "Account": [logout_page],
+
+            }
+        )
+
+    else:
+          pg = st.navigation(
+            {   
+                "Marking Components": [intern_learning_journal,
+                                    intern_reflection_report],
+                                    
+                "Account": [logout_page],
+            }
+        )
+
 
 else:
     pg = st.navigation([login_page])
