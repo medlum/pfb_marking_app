@@ -67,8 +67,6 @@ def process_data(data):
 
     # Sum the values in 'Program Correctness', 'Code Readability', 'Code Efficiency', 'Documentation', and 'Assignment Specifications'
     df['Total'] = df['Introduction (4 marks)'] + df['OJT Plan (6 marks)'] + df['Analysis and reflection on 3 experiences (Total 30 marks)'] + df[ 'Showcase of accomplished task/achievement (20 marks)'] + df['Diversity and Inclusion (10 marks)'] + df['Influence of internship on future plan (20 marks)'] + df['Quality of writing (10 marks)']
-
-# add test comment
     
     cols = ['Student Name', 
             'Introduction (4 marks)', 
