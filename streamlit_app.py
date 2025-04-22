@@ -26,16 +26,20 @@ login_page = st.Page(login, title="Log in", icon=":material/login:")
 logout_page = st.Page(logout, title="Log out (to delete data)", icon=":material/logout:")
 
 pfb_group_project = st.Page("components/pfb_group_project.py", 
-                   title="PFB Group Project -  Python code", 
+                   title="PFB Group Project ( Python Code )", 
                    icon=":material/terminal:", 
                    default=True)
 
 pfb_research_report = st.Page("components/pfb_research_report.py", 
-                   title="PFB Group Project - Research report", 
+                   title="PFB Group Project ( Research Report )", 
                    icon=":material/description:")
 
+pfb_drones_individual_assignment = st.Page("components/pfb_drones_individual_assignment.py", 
+                   title="PFB Individual Assignment ( Drones )", 
+                   icon=":material/code_blocks:")
+
 pfb_individual_assignment = st.Page("components/pfb_individual_assignment.py", 
-                   title="PFB Individual Assignment", 
+                   title="PFB Individual Assignment ( SKU )", 
                    icon=":material/code_blocks:")
 
 
@@ -59,6 +63,7 @@ if st.session_state.logged_in:
             {   
                 "Marking Components": [pfb_group_project,
                                     pfb_research_report, 
+                                    pfb_drones_individual_assignment,
                                     pfb_individual_assignment, 
                                     intern_learning_journal,
                                     intern_reflection_report],
