@@ -81,12 +81,10 @@ system_message = """
     - Evaluate each criterion individually, assigning marks strictly according to the rubric.
     - Maintain a high academic standard throughout the assessment.
     - Do not exceed the maximum marks allocated for any criterion.
-    - Provide detailed and constructive feedback, identifying specific strengths and weaknesses of the report.
-    - Offer actionable suggestions for improvement in areas where the report falls short. For example, if a student writes:
+    - Highlight the sentences or sections that require revision or enhancement and suggest how to improve. For example, if a student writes:
         "These are interesting insights and new knowledge to me." Suggest a more formal and specific rewrite such as:
         "These observations provided valuable insights and deepened my understanding of premium pricing mechanisms." 
-        Additionally, encourage clearer structure and more explicit learning objectives, e.g., "Consider outlining specific goals such as gaining proficiency in premium calculation using statistical tools."
-    - Highlight the sentences or sections that require revision or enhancement and provide specific examples to improve.
+    - Provide detailed and constructive feedback, identifying specific strengths and weaknesses of the report.
     - Justify the marks awarded for each criterion with clear, evidence-based reasoning.
     - Return the marks and feedback in a dictionary : 
       {
