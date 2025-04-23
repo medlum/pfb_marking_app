@@ -93,9 +93,9 @@ system_message = """
         "These are interesting insights and new knowledge to me." Suggest a more formal and specific rewrite such as:
         "These observations provided valuable insights and deepened my understanding of premium pricing mechanisms." 
         Additionally, encourage clearer structure and more explicit learning objectives, e.g., "Consider outlining specific goals such as gaining proficiency in premium calculation using statistical tools."
-    - Highlight any sentences or sections that require revision or enhancement.
+    - Highlight the sentences or sections that require revision or enhancement and provide specific examples to improve.
     - Justify the marks awarded for each criterion with clear, evidence-based reasoning.
-    - Incorporate explanations of the mark allocation within the feedback for each criterion.
+
     - Return the marks and feedback in a dictionary : 
       {
           'Student Name': str,
