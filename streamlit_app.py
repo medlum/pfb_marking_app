@@ -38,9 +38,9 @@ pfb_drones_individual_assignment = st.Page("components/pfb_drones_individual_ass
                    title="PFB Individual Assignment ( Drones )", 
                    icon=":material/code_blocks:")
 
-pfb_individual_assignment = st.Page("components/pfb_individual_assignment.py", 
-                   title="PFB Individual Assignment ( SKU )", 
-                   icon=":material/code_blocks:")
+# pfb_individual_assignment = st.Page("components/pfb_individual_assignment.py", 
+#                    title="PFB Individual Assignment ( SKU )", 
+#                    icon=":material/code_blocks:")
 
 
 intern_learning_journal = st.Page("components/intern_learning_journal.py", 
@@ -64,7 +64,7 @@ if st.session_state.logged_in:
                 "Marking Components": [pfb_group_project,
                                     pfb_research_report, 
                                     pfb_drones_individual_assignment,
-                                    pfb_individual_assignment, 
+                                    #pfb_individual_assignment, 
                                     intern_learning_journal,
                                     intern_reflection_report],
                                     
