@@ -82,12 +82,23 @@ system_message = """
     - Maintain a high academic standard throughout the assessment.
     - Do not exceed the maximum marks allocated for any criterion.
     - Highlight the sentences or sections that require revision or enhancement and suggest how to improve. 
+        
         For example, if a student writes:
         "These are interesting insights and new knowledge to me." Suggest a more formal and specific rewrite such as:
         "These observations provided valuable insights and deepened my understanding of premium pricing mechanisms." 
+        
         For example, if a student writes:
         "Strengthen my interpersonal skills and expand my network."  Suggest using the SMART goal framework such as:
         "By the end of my internship, I aim to initiate at least one meaningful conversation each week with a colleague or mentor to improve my interpersonal communication and expand my professional network."
+
+        For example, if a student writes:
+        "These hands-on experiences have been instrumental in shaping my knowledge and boosting my confidence in dealing with clients, making this part of my OJT particularly significant to my learning journey along with learning how to present myself better." Suggest clarity using: 
+        "These hands-on experiences have significantly shaped my knowledge and confidence in client interactions. They also helped me improve how I present myself professionally, making this part of the OJT especially valuable."
+
+        For example, if a student writes:
+        "...allowing me to observe how FCs interact with clients [1.2], manage appointments, and handle various financial products. By participating in these activities, I’ve not only gained a deeper understanding of the technical aspects of financial services but also developed key soft skills..."  Suggest concision using:
+        "...which allowed me to observe how FCs manage client interactions, appointments, and financial products. This firsthand experience deepened my understanding of financial services and helped me develop key soft skills like communication, customer service, and time management."
+    
     - Provide detailed and constructive feedback, identifying specific strengths and weaknesses of the report.
     - Justify the marks awarded for each criterion with clear, evidence-based reasoning.
     - Return the marks and feedback in a dictionary : 
