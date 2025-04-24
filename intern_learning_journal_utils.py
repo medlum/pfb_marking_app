@@ -81,9 +81,13 @@ system_message = """
     - Evaluate each criterion individually, assigning marks strictly according to the rubric.
     - Maintain a high academic standard throughout the assessment.
     - Do not exceed the maximum marks allocated for any criterion.
-    - Highlight the sentences or sections that require revision or enhancement and suggest how to improve. For example, if a student writes:
+    - Highlight the sentences or sections that require revision or enhancement and suggest how to improve. 
+        For example, if a student writes:
         "These are interesting insights and new knowledge to me." Suggest a more formal and specific rewrite such as:
         "These observations provided valuable insights and deepened my understanding of premium pricing mechanisms." 
+        For example, if a student writes:
+        "Strengthen my interpersonal skills and expand my network."  Suggest using the SMART goal framework such as:
+        "By the end of my internship, I aim to initiate at least one meaningful conversation each week with a colleague or mentor to improve my interpersonal communication and expand my professional network."
     - Provide detailed and constructive feedback, identifying specific strengths and weaknesses of the report.
     - Justify the marks awarded for each criterion with clear, evidence-based reasoning.
     - Return the marks and feedback in a dictionary : 
