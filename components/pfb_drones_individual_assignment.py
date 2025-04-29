@@ -69,64 +69,45 @@ if upload_student_report:
        
         # evaluate student's python code 
 
-#        with st.status("Evaluating code...", expanded=True) as status:
-#            try:
-#                with st.empty():
-#                    stream = client.chat_completion(
-#                        model=model_id,
-#                        messages=st.session_state.msg_history_code,
-#                        temperature=0.1,
-#                        max_tokens=5524,
-#                        top_p=0.7,
-#                        stream=True,
-#                    )
-#                    
-#                    collected_response = ""
-#
-#                    for chunk in stream:
-#                        if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-#                            collected_response += chunk.choices[0].delta.content
-#                            st.text(collected_response.replace('{','').replace('}',''))
-#
-#                    # Convert string to dict
-#                    code_dict = ast.literal_eval(collected_response)
-#                    del st.session_state.msg_history_code
-#                    status.update(label="Code evaluation completed...", state="complete", expanded=True)
-#            
-#            except Exception as e:
-#                                st.error(e)
-
-        with st.status("Evaluating report...", expanded=True) as status:
-            
+        with st.status("Evaluating code...", expanded=True) as status:
             try:
-                stream = client.chat.completions.create(
-                    model=model_id,
-                    messages=st.session_state.msg_history,
-                    temperature=0.2,
-                    max_tokens=5524,
-                    top_p=0.7,
-                    stream=True,
-                    )
+                with st.empty():
+                    #stream = client.chat_completion(
+                    #    model=model_id,
+                    #    messages=st.session_state.msg_history_code,
+                    #    temperature=0.1,
+                    #    max_tokens=5524,
+                    #    top_p=0.7,
+                    #    stream=True,
+                    #)
 
-                collected_response = ""
+                    stream = client.chat.completions.create(
+                                                            model=model_id,
+                                                            messages=st.session_state.msg_history_code,
+                                                            temperature=0.2,
+                                                            max_tokens=5524,
+                                                            top_p=0.7,
+                                                            stream=True,
+                                                            )
+                    
+                    collected_response = ""
 
-                for chunk in stream:
-                    collected_response += chunk.choices[0].delta.content
-                
-                # display in json
-                st.json(collected_response)
+                    for chunk in stream:
+                        collected_response += chunk.choices[0].delta.content
+                        st.text(collected_response.replace('{','').replace('}',''))
 
-            except Exception as e:
-                st.error(f"Error generating response: {e}")
+                    #for chunk in stream:
+                    #    if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
+                    #        collected_response += chunk.choices[0].delta.content
+                    #        st.text(collected_response.replace('{','').replace('}',''))
 
-            try:
-                actual_dict = ast.literal_eval(collected_response)
-                data.append(actual_dict)
-
-            except Exception as e:
-                st.error(f"Error @ast.literal_eval(collected_response): {e}")
+                    # Convert string to dict
+                    code_dict = ast.literal_eval(collected_response)
+                    del st.session_state.msg_history_code
+                    status.update(label="Code evaluation completed...", state="complete", expanded=True)
             
-        status.update(label="Code evaluation completed...", state="complete", expanded=True)
+            except Exception as e:
+                                st.error(e)
 
         # append system instruction, student's name and rubrics to history        
         st.session_state.msg_history_output.append({"role": "system", "content": f"{system_message_output}"})   
@@ -147,49 +128,63 @@ if upload_student_report:
             st.error(f":red[*Unable to generate summary reports*]")
 
 
-#        # evaluate student's output
-#        with st.status("Evaluating output...", expanded=True) as status:
-#            with st.empty():
-#                
-#                try:
-#                    stream = client.chat_completion(
-#                        model=model_id,
-#                        messages=st.session_state.msg_history_output,
-#                        temperature=0.1,
-#                        max_tokens=5524,
-#                        top_p=0.7,
-#                        stream=True,
-#                    )
-#                    
-#                    collected_response = ""
-#
-#                    for chunk in stream:
-#                        if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-#                            collected_response += chunk.choices[0].delta.content
-#                            st.text(collected_response.replace('{','').replace('}',''))
-#
-#                    # Convert string to dict
-#                    output_dict = ast.literal_eval(collected_response)
-#                    del st.session_state.msg_history_output
-#                    status.update(label="Output evaluation completed...", state="complete", expanded=True)
-#
-#                except Exception as e:
-#                    st.error(e)
-#        
-#        # Concatentate code_dict and output_dict to combine the evaluation for one student
-#        try:
-#
-#            merged_data = {**code_dict, **output_dict}
-#            merged_data['Feedback'] = f"{code_dict['Feedback']} {output_dict['Feedback']}"
-#            data.append(merged_data)
-#
-#        except Exception as e:
-#            st.error(e)
-#
-#
-#if data:
-#    # write to dataframe
-#    df = process_data(data)
-#    st.write(df)
+        # evaluate student's output
+        with st.status("Evaluating output...", expanded=True) as status:
+            with st.empty():
+                
+                try:
+                    #stream = client.chat_completion(
+                    #    model=model_id,
+                    #    messages=st.session_state.msg_history_output,
+                    #    temperature=0.1,
+                    #    max_tokens=5524,
+                    #    top_p=0.7,
+                    #    stream=True,
+                    #)
+
+                    stream = client.chat.completions.create(
+                                        model=model_id,
+                                        messages=st.session_state.msg_history_output,
+                                        temperature=0.2,
+                                        max_tokens=5524,
+                                        top_p=0.7,
+                                        stream=True,
+                                        )
+                    
+                    
+                    collected_response = ""
+
+                    for chunk in stream:
+                        collected_response += chunk.choices[0].delta.content
+                        st.text(collected_response.replace('{','').replace('}',''))
+
+                    #for chunk in stream:
+                    #    if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
+                    #        collected_response += chunk.choices[0].delta.content
+                    #        st.text(collected_response.replace('{','').replace('}',''))
+
+                    # Convert string to dict
+                    output_dict = ast.literal_eval(collected_response)
+                    del st.session_state.msg_history_output
+                    status.update(label="Output evaluation completed...", state="complete", expanded=True)
+
+                except Exception as e:
+                    st.error(e)
+        
+        # Concatentate code_dict and output_dict to combine the evaluation for one student
+        try:
+
+            merged_data = {**code_dict, **output_dict}
+            merged_data['Feedback'] = f"{code_dict['Feedback']} {output_dict['Feedback']}"
+            data.append(merged_data)
+
+        except Exception as e:
+            st.error(e)
+
+
+if data:
+    # write to dataframe
+    df = process_data(data)
+    st.write(df)
             
 
