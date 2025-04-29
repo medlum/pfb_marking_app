@@ -16,7 +16,7 @@ with st.sidebar:
     
     st.subheader(f"PFB Individual Assignment")
     model_id = st.selectbox(":grey[AI model]", 
-                            model_list,
+                            model_list[0],
                             index=0,
                             help=model_help)
     

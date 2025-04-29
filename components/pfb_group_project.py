@@ -19,7 +19,7 @@ with st.sidebar:
     st.subheader(f"PFB Group Assignment")
     #st.write(":gray[*Upload by project group in a zip file*]")
     model_id = st.selectbox(":grey[AI model]", 
-                            model_list,
+                            model_list[0],
                             index=0,
                             help=model_help)
     
