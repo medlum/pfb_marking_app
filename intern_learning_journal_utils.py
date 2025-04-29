@@ -103,14 +103,14 @@ system_message = """
     - Justify the marks awarded for each criterion with clear, evidence-based reasoning.
     - Return the marks and feedback in a dictionary : 
       {
-          'Student Name': str,
-          'Review and update progress on the OJT plan (10 marks)': float,
-          'Progress on achieving personal and professional goals (15 marks)': float,
-          'Reflection on skills acquired (Total: 60 marks)': float,
-          'Quality of writing (15 marks)': float
-          'Feedback' : str
+          "Student Name": str,
+          "Review and update progress on the OJT plan (10 marks)": float,
+          "Progress on achieving personal and professional goals (15 marks)": float,
+          "Reflection on skills acquired (Total: 60 marks)": float,
+          "Quality of writing (15 marks)": float
+          "Feedback" : str
       }  
-    - Use single quotation '' for strings in the dictionary.
+    - Use double quotation "" for strings in the dictionary.
     - Your answer should only contain the returned dictionary and nothing else. 
 
 """

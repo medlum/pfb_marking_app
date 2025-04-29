@@ -89,34 +89,69 @@ if group_zip is not None:
                 st.write(extracted_contents[key][1])
 
         #if evaluate_btn:
-        try:
+        #try:
             
-            with st.status("Evaluating report...", expanded=True) as status:
-                with st.empty():
-                    try:
-                        stream = client.chat_completion(
-                            model=model_id,
-                            messages=st.session_state.msg_history,
-                            temperature=0.2,
-                            max_tokens=5524,
-                            top_p=0.7,
-                            stream=True
-                            )
-                        collected_response = ""
-                        for chunk in stream:
-                            if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                                collected_response += chunk.choices[0].delta.content
-                                st.text(collected_response.replace('{','').replace('}','').replace("'",""))
-                        
-                        actual_dict = ast.literal_eval(collected_response)
-                        data.append(actual_dict)
-                        status.update(label="Report evaluation completed...", state="complete", expanded=False)
-                    
-                    except Exception as e:
-                        st.error(e)
+        with st.status("Evaluating report...", expanded=True) as status:
+            
+            try:
+               #-------- use together API ------#
+                #placeholder = st.empty()
+                stream = client.chat.completions.create(
+                    model=model_id,
+                    messages=st.session_state.msg_history,
+                    temperature=0.2,
+                    max_tokens=5524,
+                    top_p=0.7,
+                    stream=True,
+                    )
+               
+                collected_response = ""
+
+                for chunk in stream:
+                    collected_response += chunk.choices[0].delta.content
+                    #placeholder.text(collected_response)
+                
+                # display in json
+                st.json(collected_response)
+
+            except Exception as e:
+                st.error(f"Error generating response: {e}")
+
+            try:
+                actual_dict = ast.literal_eval(collected_response)
+                data.append(actual_dict)
+
+            except Exception as e:
+                st.error(f"Error @ast.literal_eval(collected_response): {e}")
+            
+        status.update(label="Report evaluation completed...", state="complete", expanded=True)
+
+                #-------- use hugging face API ------#
+                #with st.empty():
+                #    try:
+                #        stream = client.chat_completion(
+                #            model=model_id,
+                #            messages=st.session_state.msg_history,
+                #            temperature=0.2,
+                #            max_tokens=5524,
+                #            top_p=0.7,
+                #            stream=True
+                #            )
+                #        collected_response = ""
+                #        for chunk in stream:
+                #            if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
+                #                collected_response += chunk.choices[0].delta.content
+                #                st.text(collected_response.replace('{','').replace('}','').replace("'",""))
+                #        
+                #        actual_dict = ast.literal_eval(collected_response)
+                #        data.append(actual_dict)
+                #        status.update(label="Report evaluation completed...", state="complete", expanded=False)
+                #    
+                #    except Exception as e:
+                #        st.error(e)
         
-        except Exception as e:
-            st.error(f"Error generating response: {e}")
+        #except Exception as e:
+        #    st.error(f"Error generating response: {e}")
         
         del st.session_state.msg_history
 
