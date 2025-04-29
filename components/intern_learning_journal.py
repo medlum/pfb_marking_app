@@ -23,7 +23,7 @@ with st.sidebar:
     #st.write(":gray[*(Upload by group by NPIS as a zip file)*]")
 
     model_id = st.selectbox(":grey[AI model]", 
-                            model_list,
+                            model_list[1],
                             index=0,
                             help=model_help)
     

@@ -14,6 +14,11 @@ def initialize_inferenceclient():
         
 
 
+model_list = [
+                "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+                "Qwen/Qwen2.5-72B-Instruct-Turbo"  
+            ]
+
 
 #def initialize_inferenceclient(): 
 #
@@ -27,11 +32,3 @@ def initialize_inferenceclient():
 #        st.error(f"Error initializing Inference Client: {e}")
 #        st.stop()
 #        
-
-
-model_list = [
-                "meta-llama/Llama-3.3-70B-Instruct-Turbo",
-                #"Qwen/Qwen2.5-72B-Instruct",
-                #"deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
-                #"Qwen/Qwen2.5-72B-Instruct-Turbo"  
-            ]

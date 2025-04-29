@@ -60,7 +60,8 @@ if upload_student_report:
         # display student's python code
         with st.expander(f":grey[*PYTHON FILE*]"):
             st.code(contents["python file"], language="python")
-
+        
+        #------ MARK PYTHON CODE -----#
         # append system instruction, student's name, student's python code and rubrics to history 
         st.session_state.msg_history_code.append({"role": "system", "content": f"{system_message_code}"})
         st.session_state.msg_history_code.append({"role": "system", "content": f"This is the marking rubrics for python code: {mark_rubrics_code}"})
@@ -127,7 +128,7 @@ if upload_student_report:
             st.session_state.msg_history_output.append({"role": "user", "content": f"Student did not produce an output"})
             st.error(f":red[*Unable to generate summary reports*]")
 
-
+         #------ MARK OUTPUT  -----#
         # evaluate student's output
         with st.status("Evaluating output...", expanded=True) as status:
             with st.empty():
