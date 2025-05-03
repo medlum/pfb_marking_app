@@ -1,0 +1,29 @@
+import json
+import streamlit as st
+
+#data = { "Student Name": "NEW REN TENG MICHELLE", "Review and update progress on the OJT plan (10 marks)": 8.5, "Progress on achieving personal and professional goals (15 marks)": 11.5, "Reflection on skills acquired (Total: 60 marks)": 47.5, "Quality of writing (15 marks)": 11.5, "Feedback": "Overall, the report is well-structured and demonstrates a good understanding of the OJT experience. However, there are areas for improvement in clarity, conciseness, and depth of reflection.\n\n1. **Review and update progress on the OJT plan (8.5/10):**\n- The update is clear and concise, and the influence of the 'Data Analysis' segment on learning is well-discussed. However, the reflection could be more detailed on how the skills acquired will influence future learning and performance.\n\n2. **Progress on achieving personal and professional goals (11.5/15):**\n- The goals are clearly stated, and the reflection on the current situation and action plans is good. However, the reflection could benefit from a more in-depth analysis of the challenges and a clearer prioritization of action plans.\n\n3. **Reflection on skills acquired (47.5/60):**\n- The description of new and deepened skills is thorough, and the importance and relevance of these skills are well-explained. The application of skills and knowledge is also well-articulated. However, the reflection on challenges and how they are being overcome could be more detailed and insightful.\n\n4. **Quality of writing (11.5/15):**\n- The report is generally well-organized and presented professionally. However, there are some minor grammatical and sentence structure issues that need to be addressed. Additionally, the reflection slightly exceeds the 2,000-word limit, which should be considered for future submissions.\n\n**Specific Suggestions:** - **Clarity and Conciseness:** Sentences like 'This experience has deepened my understanding of customer needs and enhanced my ability to make data-driven decision, which will be invaluable as I continue to contribute to the team.' can be more concise: 'This experience has deepened my understanding of customer needs and enhanced my data-driven decision-making skills, which will be invaluable in my role.' - **Depth of Reflection:** For example, 'The insights gained from this analysis are critical for management decision-making. Understanding the root causes of void cases enables us to implement targeted interventions, improve operational processes, and ultimately reduce the occurrence of voids.' can be more insightful: 'The insights gained from this analysis are critical for management decision-making. By understanding the root causes of void cases, we can implement targeted interventions, improve operational processes, and reduce the occurrence of voids, thereby enhancing overall efficiency and customer satisfaction.'" }
+
+
+data = { "Student Name": "Lim Xuan En", "Review and update progress on the OJT plan (10 marks)": 7.5, "Progress on achieving personal and professional goals (15 marks)": 11.5, "Reflection on skills acquired (Total: 60 marks)": 47.5, "Quality of writing (15 marks)": 11.5, "Feedback": '''Clarity and Conciseness:
+
+"Additionally, I had the opportunity to explain my process for creating the dashboard to a colleague involved in digital projects, whose task involved tracking shield transactions for GIRO and analyzing the rejection statistics." Suggest: "Additionally, I explained my dashboard creation process to a colleague involved in digital projects, specifically tracking shield transactions for GIRO and analyzing rejection statistics."
+"Although it might seem like a straightforward task, it is far more complex, involving many intricate processes and requiring a keen eye for detail." Suggest: "While it may seem straightforward, bank reconciliation is complex, involving intricate processes and requiring a keen eye for detail."
+"I developed soft skills such as collaboration and communication. I improved my ability to work with my colleagues and the offshore team through regular updates and team discussion sessions." Suggest: "I developed soft skills, particularly in collaboration and communication, by regularly updating and engaging in team discussions with colleagues and the offshore team."
+Reflection Depth:
+
+"I developed greater automation awareness as I began to recognize and implement small-scale automation techniques in repetitive tasks using Excel functions such as ‘VLOOKUP’ as I worked on the bank reconciliations to streamline matching processes." Suggest: "I developed greater automation awareness by recognizing and implementing small-scale automation techniques using Excel functions like ‘VLOOKUP’ to streamline matching processes in bank reconciliations."
+"By leveraging on Excel functions like ‘VLOOKUP’ for bank reconciliation, it allowed me to quickly identify discrepancies to ensure accurate matching of transactions and its receipts, minimizing human error and reducing the time required for manual checks." Suggest: "Using Excel functions like ‘VLOOKUP’ for bank reconciliation, I quickly identified discrepancies, ensuring accurate matching of transactions and receipts, minimizing human error, and reducing manual check time."
+Professionalism and Structure:
+
+Ensure consistent use of professional language and avoid colloquialisms.
+Use more specific and detailed examples to support your reflections.
+Maintain a clear and logical flow of ideas throughout the report.
+Overall, the report is well-structured and demonstrates a good understanding of the tasks and skills acquired. However, there is room for improvement in clarity, conciseness, and the depth of reflection. Keep refining your writing to enhance the overall quality of your report.''' }
+
+
+#for key in data:
+    #st.write(key, data[key])
+
+
+st.write(data["Feedback"])
+print(data["Feedback"])

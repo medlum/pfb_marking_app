@@ -97,7 +97,7 @@ if group_zip is not None:
             
             try:
                #-------- use together API ------#
-                #placeholder = st.empty()
+                placeholder = st.empty()
                 stream = client.chat.completions.create(
                     model=model_id,
                     messages=st.session_state.msg_history,
@@ -111,11 +111,10 @@ if group_zip is not None:
 
                 for chunk in stream:
                     collected_response += chunk.choices[0].delta.content
-                    #placeholder.text(collected_response)
+                    placeholder.text(collected_response.replace("{", " ").replace("}", " "))
                 
-                # display in json
-
-                st.json(json.dumps(collected_response))
+                # display response
+                #st.text(collected_response)
 
             except Exception as e:
                 st.error(f"Error generating response: {e}")

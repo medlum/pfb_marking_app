@@ -108,20 +108,18 @@ system_message = """
 
     - Provide detailed and constructive feedback, identifying specific strengths and weaknesses of the report.
     - Justify the marks awarded for each criterion with clear, evidence-based reasoning.
-
     - Return the marks and feedback in a dictionary : 
-      {
-          'Student Name': str,
-          'Introduction (4 marks)': float,
-          'OJT Plan (6 marks)': float,
-          'Analysis and reflection on 3 experiences (Total 30 marks)': float,
-          'Showcase of accomplished task/achievement (20 marks)': float,
-          'Diversity and Inclusion (10 marks)': float,
-          'Influence of internship on future plan (20 marks)': float,
-          'Quality of writing (10 marks)': float,
-          'Feedback' : str
-      }  
-    - Use single quotation '' for strings in the dictionary.
+        {
+          "Student Name": str,
+          "Review and update progress on the OJT plan (10 marks)": float,
+          "Progress on achieving personal and professional goals (15 marks)": float,
+          "Reflection on skills acquired (Total: 60 marks)": float,
+          "Quality of writing (15 marks)": float,
+          "Feedback" : str
+        }  
+    - Use double quotation "" for strings in the dictionary except the feedback key.
+    - Use single quotation for the Feedback key, example: "Feedback": '''Clarity and Conciseness: For example, "I have mastered the end-to-end complaint resolution process..."'''
+    - Ensure all line breaks are properly escaped as \\n.
     - Your answer should only contain the returned dictionary and nothing else. 
 """
 
