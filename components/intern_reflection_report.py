@@ -5,6 +5,7 @@ from streamlit_pdf_viewer import pdf_viewer
 from docx import Document
 from intern_reflection_report_utils import *
 import ast
+import json
 from utils_twilio_coffee import buymecoffee_btn_css, buymecoffee
 from utils_inference import initialize_inferenceclient, model_list
 from utils_help_msg import *
@@ -94,7 +95,7 @@ if group_zip is not None:
                     collected_response += chunk.choices[0].delta.content
                 
                 # display in json
-                st.json(collected_response)
+                st.json(json.dumps(collected_response))
 
             except Exception as e:
                 st.error(f"Error generating response: {e}")
