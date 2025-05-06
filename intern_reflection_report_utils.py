@@ -6,12 +6,13 @@ import pandas as pd
 import streamlit as st
 from docx import Document
 from pypdf import PdfReader
+import mammoth
 
 def extract_and_read_files(zip_path):
     # Define extraction path
     #extract_folder = "extracted_files"
     extract_folder = st.session_state.user_id
-    st.write("From intern_reflection_report_utils:", st.session_state.user_id)
+    #st.write("From intern_reflection_report_utils:", st.session_state.user_id)
 
     if Path(extract_folder).exists():
         shutil.rmtree(extract_folder)
@@ -37,11 +38,17 @@ def extract_and_read_files(zip_path):
             for file in folder.glob("*.*"):
 
                 if file.suffix.lower() == ".docx":
-                    doc = Document(file)
-                    data = "\n".join([para.text for para in doc.paragraphs])
-                    print(data)
+                    #doc = Document(file)
+                    #data = "\n".join([para.text for para in doc.paragraphs])
+                    #print(data)
                     #data = [[cell.text for cell in row.cells] for table in doc.tables for row in table.rows]
-                
+
+                    def ignore_images(image):
+                        return {}
+                    
+                    result = mammoth.convert_to_html(file,convert_image=ignore_images)
+                    data = result.value
+
                 elif file.suffix.lower() == ".pdf":
                     data = ""
                     reader = PdfReader(file)
@@ -70,7 +77,7 @@ def process_data(data):
     
     cols = ['Student Name', 
             'Introduction (4 marks)', 
-             'OJT Plan (6 marks)', 
+            'OJT Plan (6 marks)', 
             'Analysis and reflection on 3 experiences (Total 30 marks)', 
             'Showcase of accomplished task/achievement (20 marks)', 
             'Diversity and Inclusion (10 marks)',
@@ -82,45 +89,54 @@ def process_data(data):
     return df[cols]
 
 system_message = """
-1. Your primary task is to evaluate students' written assignments based on a structured marking rubric.  
-2. Follow the instructions to mark:
-    - Refer closely to the provided marking rubric to ensure accurate and consistent grading.
-    - Evaluate each criterion individually, assigning marks strictly according to the rubric.
-    - Maintain a high academic standard throughout the assessment.
-    - Do not exceed the maximum marks allocated for any criterion.
-    - Highlight the sentences or sections that require revision or enhancement and suggest how to improve. 
+1. Your task is to assess student written assignments using a structured marking rubric.
+
+2. Follow these marking guidelines:
+    - Refer closely to the rubric and assign marks per criterion, without exceeding maximum scores.
+    - Assign marks with appropriate variation to reflect the quality of each response—avoid giving uniform or overly rounded scores unless well justified.
+    - Maintain a high academic standard in grading and feedback.
+    - Justify all marks with clear, evidence-based reasoning.
+
+3. Provide detailed, constructive feedback:
+    - Structure feedback using line breaks for each major rubric criterion. Use paragraph spacing for clarity.
+    - Always refer to “the report” (not “the student”) in your comments.
+    - Include at least one direct quote from the report per rubric criterion that requires improvement.
+    - For each quote, suggest a revised version that improves formality, clarity, specificity, or conciseness.
+    - Follow this format for all sentence-level improvements:
     
-        For example, if a student writes:
-        "These are interesting insights and new knowledge to me." Suggest a more formal and specific rewrite such as:
-        "These observations provided valuable insights and deepened my understanding of premium pricing mechanisms." 
-        
-        For example, if a student writes:
-        "Strengthen my interpersonal skills and expand my network."  Suggest using the SMART goal framework such as:
-        "By the end of my internship, I aim to initiate at least one meaningful conversation each week with a colleague or mentor to improve my interpersonal communication and expand my professional network."
+        Original: "quoted sentence from the report"  
+        Suggestion: "formal, refined version of the sentence"
 
-        For example, if a student writes:
-        "These hands-on experiences have been instrumental in shaping my knowledge and boosting my confidence in dealing with clients, making this part of my OJT particularly significant to my learning journey along with learning how to present myself better." Suggest clarity using: 
-        "These hands-on experiences have significantly shaped my knowledge and confidence in client interactions. They also helped me improve how I present myself professionally, making this part of the OJT especially valuable."
+    - Apply structured frameworks like SMART goals where relevant.
+    
+    Examples:
+        Original: "These are interesting insights and new knowledge to me."  
+        Suggestion: "These observations provided valuable insights and deepened my understanding of premium pricing mechanisms."
 
-        For example, if a student writes:
-        "...allowing me to observe how FCs interact with clients [1.2], manage appointments, and handle various financial products. By participating in these activities, I’ve not only gained a deeper understanding of the technical aspects of financial services but also developed key soft skills..."  Suggest concision using:
-        "...which allowed me to observe how FCs manage client interactions, appointments, and financial products. This firsthand experience deepened my understanding of financial services and helped me develop key soft skills like communication, customer service, and time management."
+        Original: "Strengthen my interpersonal skills and expand my network."  
+        Suggestion: "By the end of my internship, I aim to initiate at least one meaningful conversation each week with a colleague or mentor to improve my interpersonal communication and expand my professional network."
 
-    - Provide detailed and constructive feedback, identifying specific strengths and weaknesses of the report.
-    - Justify the marks awarded for each criterion with clear, evidence-based reasoning.
-    - Return the marks and feedback in a dictionary : 
-        {
-          "Student Name": str,
-          "Review and update progress on the OJT plan (10 marks)": float,
-          "Progress on achieving personal and professional goals (15 marks)": float,
-          "Reflection on skills acquired (Total: 60 marks)": float,
-          "Quality of writing (15 marks)": float,
-          "Feedback" : str
-        }  
-    - Use double quotation "" for strings in the dictionary except the feedback key.
-    - Use single quotation for the Feedback key, example: "Feedback": '''Clarity and Conciseness: For example, "I have mastered the end-to-end complaint resolution process..."'''
-    - Ensure all line breaks are properly escaped as \\n.
-    - Your answer should only contain the returned dictionary and nothing else. 
+        Original: "These hands-on experiences have been instrumental in shaping my knowledge and boosting my confidence..."  
+        Suggestion: "These hands-on experiences have significantly shaped my knowledge and confidence in client interactions. They also helped me improve how I present myself professionally..."
+
+        Original: "...allowing me to observe how FCs interact with clients..."  
+        Suggestion: "...which allowed me to observe how FCs manage client interactions, appointments, and financial products..."
+
+   4. Return your response as a dictionary with the following structure:
+        {    
+            "Student Name": str,
+            "Introduction (4 marks)" : float, 
+            "OJT Plan (6 marks)": float, 
+            "Analysis and reflection on 3 experiences (Total 30 marks)": float, 
+            "Showcase of accomplished task/achievement (20 marks)": float, 
+            "Diversity and Inclusion (10 marks)": float,
+            "Influence of internship on future plan (20 marks)": float,
+            "Quality of writing (10 marks)": float,
+            "Feedback": '''Multiline feedback here. Use double quotes inside if quoting student content.'''        
+        }
+    - Use double quotes (") for all dictionary keys and string values, except for the "Feedback" value.
+    - Enclose the "Feedback" value in triple single quotes (''') to preserve formatting and line breaks.
+    - Return only the dictionary and nothing else.
 """
 
 

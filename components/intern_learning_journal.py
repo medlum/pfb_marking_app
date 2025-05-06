@@ -25,7 +25,7 @@ with st.sidebar:
     #st.write(":gray[*(Upload by group by NPIS as a zip file)*]")
 
     model_id = st.selectbox(":grey[AI model]", 
-                            model_list[1],
+                            model_list,
                             index=0,
                             help=model_help)
     
@@ -78,14 +78,17 @@ if group_zip is not None:
             # [0] refers to suffix from [file.suffix.lower(), data]
             if extracted_contents[key][0] == '.docx':
                 # [1] refers to data from [file.suffix.lower(), data]
+                st.markdown(extracted_contents[key][1], unsafe_allow_html=True)
+               
                 # [3:10] is the location of where the title and main text of the report
                 # the other index position does not have meaningful full texts.
-                for i in extracted_contents[key][1][3:10]:
-                    # why?
-                    if len(i) == 2:
-                        st.write(f"{i[0]}: {i[1]}")
-                    else:
-                        st.write(f"{i[0]}")
+                #for i in extracted_contents[key][1][3:10]:
+                #    # why?
+                #    if len(i) == 2:
+                #        st.write(f"{i[0]}: {i[1]}")
+                #    else:
+                #        st.write(f"{i[0]}")
+
 
             elif extracted_contents[key][0] == '.pdf':
                 st.write(extracted_contents[key][1])
@@ -114,7 +117,10 @@ if group_zip is not None:
                     placeholder.text(collected_response.replace("{", " ").replace("}", " "))
                 
                 # display response
-                #st.text(collected_response)
+                #st.write(dict(collected_response))
+                #print(collected_response)
+
+            
 
             except Exception as e:
                 st.error(f"Error generating response: {e}")

@@ -9,6 +9,8 @@ import json
 from utils_twilio_coffee import buymecoffee_btn_css, buymecoffee
 from utils_inference import initialize_inferenceclient, model_list
 from utils_help_msg import *
+
+
 # ---------set css-------------#
 #st.markdown(btn_css, unsafe_allow_html=True)
 
@@ -23,7 +25,7 @@ with st.sidebar:
     #st.write(":gray[*(Upload by group by NPIS as a zip file)*]")
 
     model_id = st.selectbox(":grey[AI model]", 
-                        model_list[1],
+                        model_list,
                         index=0,
                         help=model_help)
     
@@ -74,10 +76,11 @@ if group_zip is not None:
 
         with st.expander(f":grey[*Submitted report*]"):
             
-            st.write(extracted_contents[key][1])
+            #st.write(extracted_contents[key][1])
+            st.markdown(extracted_contents[key][1], unsafe_allow_html=True)
 
         #-------- use together API ------#
-        with st.status("Evaluating report...", expanded=True) as status:
+        with st.status(f"Evaluating report...", expanded=True) as status:
             
             try:
                 placeholder = st.empty()
