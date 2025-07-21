@@ -16,7 +16,7 @@ with st.sidebar:
     
     st.subheader(f"PFB Individual Assignment")
     model_id = st.selectbox(":grey[AI model]", 
-                            model_list[0],
+                            model_list,
                             index=0,
                             help=model_help)
     
@@ -73,14 +73,6 @@ if upload_student_report:
         with st.status("Evaluating code...", expanded=True) as status:
             try:
                 with st.empty():
-                    #stream = client.chat_completion(
-                    #    model=model_id,
-                    #    messages=st.session_state.msg_history_code,
-                    #    temperature=0.1,
-                    #    max_tokens=5524,
-                    #    top_p=0.7,
-                    #    stream=True,
-                    #)
 
                     stream = client.chat.completions.create(
                                                             model=model_id,
@@ -96,11 +88,6 @@ if upload_student_report:
                     for chunk in stream:
                         collected_response += chunk.choices[0].delta.content
                         st.text(collected_response.replace('{','').replace('}',''))
-
-                    #for chunk in stream:
-                    #    if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                    #        collected_response += chunk.choices[0].delta.content
-                    #        st.text(collected_response.replace('{','').replace('}',''))
 
                     # Convert string to dict
                     code_dict = ast.literal_eval(collected_response)

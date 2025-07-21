@@ -57,7 +57,7 @@ if st.session_state.logged_in:
     st.sidebar.title(":orange[Assistive AI Marking Tool]", help=intro_var)
     #st.sidebar.text_input("Enter huggingface token")
 
-    if st.session_state.user_id in ("zengxing" ,"charles", "lester"): 
+    if st.session_state.user_id in ("zengxing" ,"charles", "lester", "andy"): 
 
         pg = st.navigation(
             {   

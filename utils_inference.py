@@ -14,7 +14,7 @@ def initialize_inferenceclient():
         
 
 
-model_list = [
+model_list = [  "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
                 "meta-llama/Llama-3.3-70B-Instruct-Turbo",
                 "Qwen/Qwen2.5-72B-Instruct-Turbo"  
             ]
