@@ -35,8 +35,10 @@ def extract_and_read_files(zip_path):
             
             shutil.copy('./data/SpaceUsage.csv', folder)
 
+            main_error_flag = True
+            
             for py_file in folder.glob("*.py"):  
-                
+                main_error_flag = False 
                 try:
                     result = from_path(py_file)
                     encoding = result.best().encoding if result.best() else "utf-8"
@@ -56,7 +58,7 @@ def extract_and_read_files(zip_path):
 
                 try:
                     # set up an error flag and use subprocess to run python code   
-                    main_error_flag = False
+
                     os.chdir(py_file.parent)
                     subprocess.run(['python3', py_file.name], check=True)
                 
@@ -93,25 +95,34 @@ def extract_and_read_files(zip_path):
 
 
 def process_data(data):
-    # Convert list of dictionaries to DataFrame
     df = pd.DataFrame(data)
 
-    # Sum the values in the second and third columns, and store the result in 'Program Correctness'
-    df['Program Correctness'] = df['Output for Efficient Transit Payment Summary'] + df['Output for Top 5 of 20 SKUs']
-    # Sum the values in 'Program Correctness', 'Code Readability', 'Code Efficiency', 'Documentation', and 'Assignment Specifications'
-    df['Total'] = df['Program Correctness'] + df['Code Readability'] + df['Code Efficiency'] + df['Documentation'] + df['Assignment Specifications']
+    df['Program Correctness'] = (
+        df.get('Output for FantaxySky Drone Air Show Summary', 0) + 
+        df.get('Output for Top 5 of 10 programs', 0)
+    )
 
-    
-    cols = ['Student Name', 
-            'Program Correctness', 
-            'Code Readability', 
-            'Code Efficiency', 
-            'Documentation', 
-            'Assignment Specifications', 
-            'Total', 
-            'Feedback']
+    df['Total'] = (
+        df['Program Correctness'] + 
+        df.get('Code Readability', 0) + 
+        df.get('Code Efficiency', 0) + 
+        df.get('Documentation', 0) + 
+        df.get('Assignment Specifications', 0)
+    )
 
-    return df[cols]
+    cols = [
+        'Student Name', 
+        'Program Correctness', 
+        'Code Readability', 
+        'Code Efficiency', 
+        'Documentation', 
+        'Assignment Specifications', 
+        'Total', 
+        'Feedback'
+    ]
+
+    existing_cols = [col for col in cols if col in df.columns]
+    return df[existing_cols]
 
 
 # custom CSS for buttons
