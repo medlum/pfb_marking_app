@@ -145,6 +145,8 @@ def extract_and_read_files(main_zip_path):
                         if 'summary' in file.stem.lower():
                             with open(file, "r", encoding="utf-8") as f:
                                 extracted_data[folder_name]["summary"].append("MAIN.PY NOT FOUND")
+        
+                            
     return extracted_data
 
 main_py_error = ":red[*Error running 'main.py'. It could be missing python files or code errors like IndexError during the program execution using our test data*]."

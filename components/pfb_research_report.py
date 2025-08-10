@@ -34,7 +34,7 @@ with st.sidebar:
                             help=model_help)
     
     upload_student_report = st.file_uploader(
-        ":gray[Upload a reseach report (single file in .docx or .pdf)]", type=['docx', 'pdf'])
+        ":gray[Upload a research report (single file in .docx or .pdf)]", type=['docx', 'pdf'])
     
     st.markdown(
         f'<span style="font-size:12px; color:gray;">{disclaimer_var}</span>', unsafe_allow_html=True)
@@ -74,6 +74,8 @@ if upload_student_report is not None:
             })
         except Exception as e:
             st.error(f"Error processing student report in docx format: {e}")
+            
+
     
     elif upload_student_report.type == 'application/pdf':
         try:
@@ -113,22 +115,27 @@ if upload_student_report is not None:
         })
         with st.empty():
             try:
-                stream = client.chat_completion(
-                    model=model_id,
-                    messages=st.session_state.msg_history,
-                    temperature=0.2,
-                    max_tokens=5524,
-                    top_p=0.7,
-                    stream=True,
+
+                stream = client.chat.completions.create(
+                model=model_id,
+                messages=st.session_state.msg_history,
+                temperature=0.2,
+                max_tokens=5524,
+                top_p=0.7,
+                stream=True,
                 )
-
+                
                 collected_response = ""
-
                 for chunk in stream:
-                    if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                        collected_response += chunk.choices[0].delta.content
-                        st.chat_message("assistant").write(collected_response)
-           
+                    # Check if chunk has choices and delta content
+                    if (hasattr(chunk, 'choices') and 
+                        len(chunk.choices) > 0 and 
+                        hasattr(chunk.choices[0], 'delta') and 
+                        hasattr(chunk.choices[0].delta, 'content')):
+                        content = chunk.choices[0].delta.content or ""
+                        collected_response += content
+                        st.write(collected_response)
+
                 del st.session_state.msg_history
 
             except Exception as e:

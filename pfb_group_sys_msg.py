@@ -17,7 +17,7 @@ system_message_code = """
         'Assignment Specifications': float
         'Feedback' : str
       }  
-    - Use single quotation '' for strings in the dictionary.
+    - Use double quotation "" for strings in the dictionary.
     - Your answer should only contain the returned dictionary and nothing else. 
 """
 
@@ -32,10 +32,10 @@ system_message_output = """
     - Return the marks and feedback in a dictionary : 
       {   
         'Team members': list,  
-        'Output marks: float,
+        'Program Correctness': float,
         'Feedback' : str
       }  
-    - Use single quotation '' for strings in the dictionary.
+    - Use double quotation "" for strings in the dictionary.
     - Your answer should only contain the returned dictionary and nothing else. 
 """
 

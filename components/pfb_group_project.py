@@ -7,10 +7,75 @@ import pandas as pd
 from utils_twilio_coffee import buymecoffee_btn_css, buymecoffee
 from utils_inference import initialize_inferenceclient, model_list
 from utils_help_msg import *
-
+import json
 
 # --- Initialize the Inference Client with the API key ----#
 client = initialize_inferenceclient()
+
+def aggregate_output(final_output_dict, output_dict):
+    for key, value in output_dict.items():
+        if key == "Team members":
+            # skip because it's the same across all outputs
+            if key not in final_output_dict:
+                final_output_dict[key] = value
+            continue
+
+        if key not in final_output_dict:
+            final_output_dict[key] = value
+        else:
+            # Sum numeric values
+            if isinstance(value, (int, float)):
+                final_output_dict[key] += value
+            # Concatenate strings
+            elif isinstance(value, str):
+                final_output_dict[key] += " " + value
+
+    return final_output_dict
+
+
+def process_data(data):
+    df = pd.DataFrame(data)
+
+    df['Total'] = (
+        df['Program Correctness'] + 
+        df.get('Code Readability', 0) + 
+        df.get('Code Efficiency', 0) + 
+        df.get('Documentation', 0) + 
+        df.get('Assignment Specifications', 0)
+    )
+
+    cols = [
+        'Team members', 
+        'Program Correctness', 
+        'Code Readability', 
+        'Code Efficiency', 
+        'Documentation', 
+        'Assignment Specifications', 
+        'Total', 
+        'Feedback'
+    ]
+
+    existing_cols = [col for col in cols if col in df.columns]
+    return df[existing_cols] 
+
+
+def sanitize_llm_response(response_text, required_keys, default_value=0):
+    """
+    Parses LLM response and ensures all required keys are present with defaults.
+    """
+    try:
+        data = json.loads(response_text)
+    except json.JSONDecodeError as e:
+        st.error(f"Invalid JSON from LLM: {e}")
+        data = {}
+
+    # Fill in missing keys with default value
+    for key in required_keys:
+        if key not in data:
+            data[key] = default_value
+
+    return data
+
 
 
 # ------- create side bar --------#
@@ -19,7 +84,7 @@ with st.sidebar:
     st.subheader(f"PFB Group Assignment")
     #st.write(":gray[*Upload by project group in a zip file*]")
     model_id = st.selectbox(":grey[AI model]", 
-                            model_list[0],
+                            model_list,
                             index=0,
                             help=model_help)
     
@@ -32,6 +97,7 @@ with st.sidebar:
 
 # to store marks from each output
 program_correctness_data = []
+
 
 if upload_student_report:
 
@@ -50,7 +116,10 @@ if upload_student_report:
 
     # extract and read zip file
     extracted_content = extract_and_read_files(upload_student_report)
-     
+    data = [] 
+    output_dict = {}
+    final_output_dict =   { }  
+
  
     for folder, contents in extracted_content.items():
             
@@ -59,11 +128,14 @@ if upload_student_report:
             st.text(contents["team_members"]) 
             st.subheader(f":red[summary_report.txt]")
 
-            #-------- code section for the marking of output ------#
+            #------------------------------------------------------------#
+            #-------- code section for the marking of output       ------#
+            #------------------------------------------------------------#
             try:
 
                 # iterate over the decreasing, increasing and volatile output 
                 for index, item in enumerate(contents['summary']):
+
 
                     # create 'msg_history_output' for marking the output
                     if 'msg_history_output' not in st.session_state:
@@ -92,50 +164,65 @@ if upload_student_report:
                     with st.status(f"Evaluating {item[0]}", expanded=True) as status:
                         with st.empty():
                             try:
-                                stream = client.chat_completion(
-                                    model=model_id,
-                                    messages=st.session_state.msg_history_output,
-                                    temperature=0.1,
-                                    max_tokens=5524,
-                                    top_p=0.7,
-                                    stream=True,
+                                stream = client.chat.completions.create(
+                                model=model_id,
+                                messages=st.session_state.msg_history_output,
+                                temperature=0.2,
+                                max_tokens=5524,
+                                top_p=0.7,
+                                stream=True,
                                 )
-                                
+                                    
                                 collected_response = ""
 
                                 for chunk in stream:
-                                    if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                                        collected_response += chunk.choices[0].delta.content
-                                        st.text(collected_response.replace('{','').replace('}',''))
+                                    # Check if chunk has choices and delta content
+                                    if (hasattr(chunk, 'choices') and 
+                                        len(chunk.choices) > 0 and 
+                                        hasattr(chunk.choices[0], 'delta') and 
+                                        hasattr(chunk.choices[0].delta, 'content')):
+                                        content = chunk.choices[0].delta.content or ""
+                                        collected_response += content
+                                        st.write(collected_response.replace('{','').replace('}','').replace('"','')
+                                                .replace('Team members', '**:orange[Team members]**')
+                                                .replace(f'Program Correctness', f':orange[{item[0]}]')
+                                                .replace('Feedback', '**:orange[Feedback]**')
+                                                )
+                                        
+                                # Sanitize and parse LLM response
+                                if collected_response.strip():
+                                    required_keys_output = [
+                                        "Team members",
+                                        f"Program Correctness",
+                                        "Feedback"
+                                    ]
+                                    output_dict = sanitize_llm_response(collected_response, required_keys_output)
 
-                                # Convert string to dict
-                                output_dict = ast.literal_eval(collected_response)
-                                # append to program_correctness_data
-                                program_correctness_data.append(output_dict)
-                                # delete 'msg_history_output' after marking each output
-                                del st.session_state.msg_history_output
-                                status.update(label=f"Evaluation completed for {item[0]}...", state="complete", expanded=True)
+                                    final_output_dict = aggregate_output(final_output_dict, output_dict)
+                                
+                                else:
+                                    st.error("No response received from output evaluation")
+                                    output_dict = {}
                             
                             except Exception as e:
                                 st.error(e)
-                                
-                        #sms_txt = f"⚠️ <{st.session_state.user_id}> Output evaluation ✅"
-                        #send_sms_txt(sms_txt)
-            
+
+                    ## delete 'msg_history_output' after marking each output
+                    del st.session_state.msg_history_output
+                    
             except Exception as e:
                 # create 'msg_history_output' for marking the output
-                if 'msg_history_output' not in st.session_state:
-                    st.session_state.msg_history_output = []
+                #if 'msg_history_output' not in st.session_state:
+                #    st.session_state.msg_history_output = []
 
-                st.session_state.msg_history_output.append({"role": "user", 
-                                                            "content": f"Fail to generate output from the python code"})
+                #st.session_state.msg_history_output.append({"role": "user", 
+                #                                            "content": f"Fail to generate output from the python code"})
                 
                 st.error(f":red[*Unable to generate summary reports*]")
                 
-                #sms_txt = f"⚠️ <{st.session_state.user_id}> Summary reports ❌"
-                #send_sms_txt(sms_txt)
-
-            #-------- code section for the marking of python code ------#
+            #------------------------------------------------------------#
+            #-------- code section for the marking of python code -------#
+            #------------------------------------------------------------#
             st.write("---")
             st.subheader(f":red[Python code]")
 
@@ -155,7 +242,7 @@ if upload_student_report:
                 
                 # append each python file 
                 st.session_state.msg_history_code.append({"role": "user", 
-                                                          "content": f"Python filename: {filename}\nPython code:\n{item}"})
+                                                        "content": f"Python filename: {filename}\nPython code:\n{item}"})
                 #display code for each file
                 with st.expander(f":blue[*{filename}*]"):
                     st.code(item, language="python")
@@ -164,60 +251,94 @@ if upload_student_report:
             with st.status("Evaluating...", expanded=True) as status:
                 with st.empty():
                     try:
-                        stream = client.chat_completion(
-                            model=model_id,
-                            messages=st.session_state.msg_history_code,
-                            temperature=0.1,
-                            max_tokens=5524,
-                            top_p=0.7,
-                            stream=True,
+                        stream = client.chat.completions.create(
+                        model=model_id,
+                        messages=st.session_state.msg_history_code,
+                        temperature=0.2,
+                        max_tokens=5524,
+                        top_p=0.7,
+                        stream=True,
                         )
                         
                         collected_response = ""
-
                         for chunk in stream:
-                            if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                                collected_response += chunk.choices[0].delta.content
-                                st.text(collected_response.replace('{','').replace('}',''))
+                            # Check if chunk has choices and delta content
+                            if (hasattr(chunk, 'choices') and 
+                                len(chunk.choices) > 0 and 
+                                hasattr(chunk.choices[0], 'delta') and 
+                                hasattr(chunk.choices[0].delta, 'content')):
+                                content = chunk.choices[0].delta.content or ""
+                                collected_response += content
+                                st.write(collected_response.replace('{','').replace('}','').replace('"','')
+                                    .replace('Team members', '**:orange[Student Name]**')
+                                    .replace('Code Readability', '**:orange[Code Readability]**')
+                                    .replace('Code Efficiency', '**:orange[ Code Efficiency]**')
+                                    .replace('Documentation', '**:orange[Documentation]**')
+                                    .replace('Assignment Specifications', '**:orange[Assignment Specifications]**')
+                                    .replace('Feedback', '**:orange[Feedback]**')
+                                    )
 
-                        # Convert string to dict
-                        code_dict = ast.literal_eval(collected_response)
-                        # del msg_history_code
-                        del st.session_state.msg_history_code
-                        status.update(label="Evaluation completed for code...", state="complete", expanded=True)
+                        # Sanitize and parse LLM response
+                        if collected_response.strip():
+                            required_keys_code = [
+                                "Team members",
+                                "Code Readability",
+                                "Code Efficiency",
+                                "Documentation",
+                                "Assignment Specifications",
+                                "Feedback"
+                            ]
+                            code_dict = sanitize_llm_response(collected_response, required_keys_code)
+                        else:
+                            st.error("No response received from code evaluation")
+                            code_dict = {}
+
                     except Exception as e:
                         st.error(e)
-      
 
-if program_correctness_data:
-    # sum the marks for each output 
-    program_correctness_marks = sum(item["Output marks"] for item in program_correctness_data)
-    # concatenate feedback from each output
-    feedback_list = [item["Feedback"] for item in program_correctness_data]
-    consolidated_feedback = " ".join(feedback_list)
+                # del msg_history_code
+                del st.session_state.msg_history_code
+                #status.update(label="Evaluation completed for code...", state="complete", expanded=True)
 
-    # Output structure
-    output = {
-        "Team members": program_correctness_data[0]["Team members"],
-        "Program Correctness": program_correctness_marks,
-        "Code Readability": code_dict["Code Readability"], 
-        "Code Efficiency": code_dict["Code Efficiency"],
-        "Documentation":code_dict["Documentation"],
-        "Assignment Specifications": code_dict["Assignment Specifications"],
-        "Consolidated Feedback": f"{consolidated_feedback} {code_dict['Feedback']}"
-    }
+            # Merge dictionaries with fallbacks
+    try:
+
+        st.write(final_output_dict)
+        # Extract feedback from both dictionaries (default to empty string if missing)
+        code_feedback = code_dict.get("Feedback", "")
+        output_feedback = final_output_dict.get("Feedback", "")
+
+        # Concatenate feedbacks, separating with a newline if both exist
+        combined_feedback = "\n".join(filter(None, [code_feedback, output_feedback]))
+
+        # Merge the dictionaries
+        merged_data = {**code_dict, **final_output_dict}
+
+        # Override the Feedback field with the combined one
+        merged_data["Feedback"] = combined_feedback
+
+        # Ensure required keys are present with default 0 values
+        required_final_keys = [
+            "Team members",
+            "Program Correctness",
+            "Code Readability",
+            "Code Efficiency",
+            "Documentation",
+            "Assignment Specifications",
+            "Feedback",
+        ]
+
+        for key in required_final_keys:
+            if key not in merged_data:
+                merged_data[key] = 0  # Default fallback
+
+        data.append(merged_data)
+
+    except Exception as e:
+        st.error(f"Error merging evaluations: {e}") 
+
     
-    st.write("---")
-    st.subheader(f":red[Marks Summary]")
-    st.dataframe(output)
-    st.write(f":grey[*Program Correctness is the sum of the output marks from evaluation of summary_report.txt*]")
-    #sms_txt = f"⚠️ <{st.session_state.user_id}> Marks Summary ✅"
-    #send_sms_txt(sms_txt)
-
-# code_dict is a dict the generated responses from llm 
-# { 'Team_members': ,
-#   'Code Readability': ,
-#   'Code Efficiency': ,
-#   'Documentation':,
-#   'Assignment Specifications': 
-# }
+    if data:
+        # write to dataframe
+        df = process_data(data)
+        st.write(df)
