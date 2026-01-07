@@ -1,0 +1,27 @@
+DeliveryMax Summary
+===================
+Station,Total_Earning,Total_Packages,Number_of_Routes,Total_Distance
+Central Hub,20305.00,44,2336,1185.00
+City Center,24880.00,51,2360,1509.00
+East Gate,24035.00,48,2270,1291.00
+Gateway Station,18505.00,46,2279,1254.00
+Harbor Point,14740.00,31,1635,946.00
+Industrial Park,19880.00,40,2085,1265.00
+Lakeside Terminal,25500.00,40,1964,1184.00
+Metro Junction,23100.00,46,2367,1210.00
+Mountain View,26495.00,52,2526,1408.00
+North Point,19550.00,47,2322,1288.00
+Riverside Hub,33485.00,50,2525,1622.00
+South Terminal,25830.00,44,2089,1311.00
+Sunset Plaza,26070.00,51,2600,1528.00
+Valley Ridge,25145.00,48,2566,1419.00
+West Station,17895.00,39,1963,1212.00
+
+
+Top 5 of 15 programs
+===================
+Riverside Hub,33485.00
+Mountain View,26495.00
+Sunset Plaza,26070.00
+South Terminal,25830.00
+Lakeside Terminal,25500.00

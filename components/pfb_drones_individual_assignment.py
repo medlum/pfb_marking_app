@@ -1,7 +1,7 @@
 import streamlit as st
 from huggingface_hub import InferenceClient
-from pfb_drones_individual_utils import *
-from pfb_drones_individual_sys_msg import *
+from pfb_deliverymax_individual_utils import *
+from pfb_deliverymax_individual_sys_msg import *
 from charset_normalizer import from_path
 import ast
 import json
