@@ -87,9 +87,9 @@ You are an AI assistant helping a programming lecturer evaluate student Python a
         latePenalty = 0
         if 0 < minute <= 60:
             latePenalty -= 75
-        elif minute <= 120:
+        elif 60 < minute <= 120:
             latePenalty -= 150
-        else:
+        elif minute > 120:
             latePenalty = -300
         return latePenalty
 

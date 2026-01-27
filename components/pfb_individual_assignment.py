@@ -1,7 +1,6 @@
 import streamlit as st
-from huggingface_hub import InferenceClient
-from pfb_individual_utils import *
-from pfb_individual_sys_msg import *
+from pfb_deliverymax_individual_utils import *
+from pfb_deliverymax_individual_sys_msg import *
 from charset_normalizer import from_path
 import ast
 from utils_twilio_coffee import buymecoffee_btn_css, buymecoffee
@@ -35,7 +34,7 @@ if upload_student_report:
     # display the correct output for reference  
     st.sidebar.markdown(":blue[Marking Reference]", help=summary_report_var)
     with st.sidebar.expander("Summary Report"):
-        st.code(SpaceSummary)
+        st.code(OutputSummary)
     with st.sidebar.expander("Marking rubrics"):
         st.write(mark_rubrics_output_reference)
         st.write(mark_rubrics_code)
