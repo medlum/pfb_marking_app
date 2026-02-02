@@ -176,7 +176,7 @@ if upload_student_report:
                         max_tokens=5524,
                         top_p=0.7,
                         stream=True,
-                    )ß
+                    )
                     
                     collected_response = ""
                     for chunk in stream:
