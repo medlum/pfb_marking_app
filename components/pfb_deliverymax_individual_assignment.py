@@ -15,7 +15,7 @@ client = initialize_inferenceclient()
 # Helper function to sanitize LLM responses
 def sanitize_llm_response(response_text, required_keys, default_value=0):
     """
-    Parses LLM response and ensures all required keys are present with defaults.
+    Parses LLM response and ensures all required keys are present with defaults.ß
     """
     try:
         data = json.loads(response_text)
@@ -176,7 +176,7 @@ if upload_student_report:
                         max_tokens=5524,
                         top_p=0.7,
                         stream=True,
-                    )
+                    )ß
                     
                     collected_response = ""
                     for chunk in stream:
@@ -189,7 +189,7 @@ if upload_student_report:
                             collected_response += content
                             st.write(collected_response.replace('{','').replace('}','').replace('"','')
                                      .replace('Student Name', '**:orange[Student Name]**')
-                                     .replace('Output for FantaxySky Drone Air Show Summary', '**:orange[Output for FantaxySky Drone Air Show Summary]**')
+                                     .replace('Output for DeliveryMax Summary', '**:orange[Output for DeliveryMax Summary]**')
                                      .replace('Output for Top 5 of 10 programs', '**:orange[Output for Top 5 of 10 programs]**')
                                      .replace('Feedback', '**:orange[Feedback]**')
                                      )
@@ -198,7 +198,7 @@ if upload_student_report:
                     if collected_response.strip():
                         required_keys_output = [
                             "Student Name",
-                            "Output for FantaxySky Drone Air Show Summary",
+                            "Output for DeliveryMax Summary",
                             "Output for Top 5 of 10 programs",
                             "Feedback"
                         ]
@@ -240,7 +240,7 @@ if upload_student_report:
                 "Code Efficiency",
                 "Documentation",
                 "Assignment Specifications",
-                "Output for FantaxySky Drone Air Show Summary",
+                "Output for DeliveryMax Summary",
                 "Output for Top 5 of 10 programs",
                 "Feedback"
             ]
@@ -251,7 +251,7 @@ if upload_student_report:
 
             # Compute derived score
             merged_data["Program Correctness"] = (
-                merged_data.get("Output for FantaxySky Drone Air Show Summary", 0) +
+                merged_data.get("Output for DeliveryMax Summary", 0) +
                 merged_data.get("Output for Top 5 of 10 programs", 0)
             )
 

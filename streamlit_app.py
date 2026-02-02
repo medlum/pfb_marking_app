@@ -34,7 +34,7 @@ pfb_research_report = st.Page("components/pfb_research_report.py",
                    title="PFB Group Project ( Research Report )", 
                    icon=":material/description:")
 
-pfb_drones_individual_assignment = st.Page("components/pfb_drones_individual_assignment.py", 
+pfb_drones_individual_assignment = st.Page("components/pfb_deliverymax_individual_assignment.py", 
                    title="PFB Individual Assignment ( DeliveryMax )", 
                    icon=":material/code_blocks:")
 
