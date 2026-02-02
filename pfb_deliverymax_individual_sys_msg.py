@@ -143,13 +143,13 @@ You are an AI assistant helping a programming lecturer evaluate student Python a
     # topStation.sort(reverse=True)
 
     # ---------------------------- PART 3: Insert your own code ---------------------------#
-    # 1. Write the calculated info to a txt file. Name it as DroneSummary.txt
+    # 1. Write the calculated info to a txt file. Name it as DeliverySummary.txt
     fp_txt = Path.cwd()/"DeliverySummary.txt"
     with fp_txt.open(mode="w", encoding="UTF-8") as file:
         file.write("DeliveryMax Summary\n")
         file.write("===================\n")
         file.write(
-            "Station,Total_Earning,Total_Packages,Number_of_Routes,Total_Distance\n")
+            "Station,Total_Earning,Number_of_Routes,Total_Packages,Total_Distance\n")
         for station in sorted(DeliverySummary):
             info = DeliverySummary[station]
             file.write(
@@ -200,7 +200,7 @@ mark_rubrics_output = """
 
     DeliveryMax Summary
     ===================
-    Station,Total_Earning,Total_Packages,Number_of_Routes,Total_Distance
+    Station,Total_Earning,Number_of_Routes,Total_Packages, Total_Distance
     Central Hub,20305.00,44,2336,1185.00
     City Center,24880.00,51,2360,1509.00
     East Gate,24035.00,48,2270,1291.00
@@ -217,11 +217,11 @@ mark_rubrics_output = """
     Valley Ridge,25145.00,48,2566,1419.00
     West Station,17895.00,39,1963,1212.00
 
-    - 16 marks and more: Generated output has more than 90 percent of correct format, correct values for Program,Revenue,Number_of_Sales,Average_Revenue,Total_Number_of_Drones, Total_Duration, no unnecessary details and no missing required elements.
-    - 14 to less than 16 marks: Generated output has 80-90 percent of correct format, correct values for Program,Revenue,Number_of_Sales,Average_Revenue,Total_Number_of_Drones, Total_Duration, minor unnecessary details, or minor missing required elements.
-    - 12 to less than 14 marks: Generated output has 70-79 percent of correct format, correct values for Program,Revenue,Number_of_Sales,Average_Revenue,Total_Number_of_Drones, Total_Duration,  some unnecessary details, or some missing required elements.
-    - 10 to less than 12 marks: Generated output has 60 - 69 percent of correct format, correct values for Program,Revenue,Number_of_Sales,Average_Revenue,Total_Number_of_Drones, Total_Duration,  many unnecessary details, or many missing required elements.
-    - Less than 10 marks: Generated output has less than 60 percent of correct format, correct values for Program,Revenue,Number_of_Sales,Average_Revenue,Total_Number_of_Drones, Total_Duration, major unnecessary details, or major missing required elements.
+    - 16 marks and more: Generated output has more than 90 percent of correct format, correct values for Station,Total_Earning,Number_of_Routes,Total_Packages, Total_Distance, no unnecessary details and no missing required elements.
+    - 14 to less than 16 marks: Generated output has 80-90 percent of correct format, correct values for Station,Total_Earning,Number_of_Routes,Total_Packages, Total_Distance, minor unnecessary details, or minor missing required elements.
+    - 12 to less than 14 marks: Generated output has 70-79 percent of correct format, correct values for Station,Total_Earning,Number_of_Routes,Total_Packages, Total_Distance,  some unnecessary details, or some missing required elements.
+    - 10 to less than 12 marks: Generated output has 60 - 69 percent of correct format, correct values for Station,Total_Earning,Number_of_Routes,Total_Packages, Total_Distance,  many unnecessary details, or many missing required elements.
+    - Less than 10 marks: Generated output has less than 60 percent of correct format, correct values for Station,Total_Earning,Number_of_Routes,Total_Packages, Total_Distance, major unnecessary details, or major missing required elements.
 
 
 2.⁠ ⁠ Correct ⁠output and the marking rubrics for 'Top 5 of 15 programs' (Max 10 marks) :
@@ -283,7 +283,7 @@ mark_rubrics_code = """
 - Less than 12.5 marks: No meaningful documentation, missing docstrings, no explanation of the code.
 
 6.⁠ ⁠Assignment Specifications (Max 5 marks)
-- 4 marks and more: Fully meets all assignment requirements, such as the use of Path.cwd() to read and write files, follow the file name convention: 'DroneSummary.txt', did not use pandas module and list comphrension which are not taught to students.
+- 4 marks and more: Fully meets all assignment requirements, such as the use of Path.cwd() to read and write files, follow the file name convention: 'DeliverySummary.txt', did not use pandas module and list comphrension which are not taught to students.
 - 3.5 to less than 4 marks: Mostly meets specifications, but minor missing details or formatting issues.
 - 3 to less than 3.5 marks: Partially meets specifications, missing some key requirements but still functional.
 - 2.5 to less than 3 marks: Significant missing requirements, incorrect submission format.
@@ -295,7 +295,7 @@ mark_rubrics_code = """
 OutputSummary = """
 DeliveryMax Summary
 ===================
-Station,Total_Earning,Total_Packages,Number_of_Routes,Total_Distance
+Station,Total_Earning,Number_of_Routes,Total_Packages,Total_Distance
 Central Hub,20305.00,44,2336,1185.00
 City Center,24880.00,51,2360,1509.00
 East Gate,24035.00,48,2270,1291.00
