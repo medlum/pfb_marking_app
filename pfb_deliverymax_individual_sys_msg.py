@@ -183,7 +183,7 @@ Respond ONLY with a single valid JSON object in this format:
 {
   "Student Name": "John Doe",
   "Output for DeliveryMax Summary": 5.0,
-  "Output for Top 5 of 10 programs": 5.0,
+  "Output for Top 5 of 15 programs": 5.0,
   "Feedback": "Output is correct and matches expected format."
 }
 
@@ -234,11 +234,11 @@ mark_rubrics_output = """
     Lakeside Terminal,25500.00
 
 
-- 8 marks and more: Generated output has more than 80 percent of correct format, correct values for Top 5 of 10 programs, no unnecessary details and no missing required elements.
-- 7 to less than 8 marks: Generated output has 70-80 percent of correct format, correct values for Top 5 of 10 programs, minor unnecessary details, or minor missing required elements.
-- 6 to less than 7 marks: Generated output has 60-70 percent of correct format, correct values for Top 5 of 10 programs,  some unnecessary details, or some missing required elements.
-- 5 to less than 6 marks: Generated output has 50-60 percent of correct format, correct values for Top 5 of 10 programs,  many unnecessary details, or many missing required elements.
-- Less than 5 marks: Generated output has less than 50 percent of correct format, correct values for Top 5 of 10 programs, major unnecessary details, or major missing required elements.
+- 8 marks and more: Generated output has more than 80 percent of correct format, correct values for Top 5 of 15 programs, no unnecessary details and no missing required elements.
+- 7 to less than 8 marks: Generated output has 70-80 percent of correct format, correct values for Top 5 of 15 programs, minor unnecessary details, or minor missing required elements.
+- 6 to less than 7 marks: Generated output has 60-70 percent of correct format, correct values for Top 5 of 15 programs,  some unnecessary details, or some missing required elements.
+- 5 to less than 6 marks: Generated output has 50-60 percent of correct format, correct values for Top 5 of 15 programs,  many unnecessary details, or many missing required elements.
+- Less than 5 marks: Generated output has less than 50 percent of correct format, correct values for Top 5 of 15 programs, major unnecessary details, or major missing required elements.
 """
 
 mark_rubrics_output_reference = """
