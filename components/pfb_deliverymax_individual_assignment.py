@@ -190,7 +190,7 @@ if upload_student_report:
                             st.write(collected_response.replace('{','').replace('}','').replace('"','')
                                      .replace('Student Name', '**:orange[Student Name]**')
                                      .replace('Output for DeliveryMax Summary', '**:orange[Output for DeliveryMax Summary]**')
-                                     .replace('Output for Top 5 of 10 programs', '**:orange[Output for Top 5 of 10 programs]**')
+                                     .replace('Output for Top 5 of 15 programs', '**:orange[Output for Top 5 of 15 programs]**')
                                      .replace('Feedback', '**:orange[Feedback]**')
                                      )
 
@@ -199,7 +199,7 @@ if upload_student_report:
                         required_keys_output = [
                             "Student Name",
                             "Output for DeliveryMax Summary",
-                            "Output for Top 5 of 10 programs",
+                            "Output for Top 5 of 15 programs",
                             "Feedback"
                         ]
                         output_dict = sanitize_llm_response(collected_response, required_keys_output)
@@ -241,7 +241,7 @@ if upload_student_report:
                 "Documentation",
                 "Assignment Specifications",
                 "Output for DeliveryMax Summary",
-                "Output for Top 5 of 10 programs",
+                "Output for Top 5 of 15 programs",
                 "Feedback"
             ]
 
@@ -252,7 +252,7 @@ if upload_student_report:
             # Compute derived score
             merged_data["Program Correctness"] = (
                 merged_data.get("Output for DeliveryMax Summary", 0) +
-                merged_data.get("Output for Top 5 of 10 programs", 0)
+                merged_data.get("Output for Top 5 of 15 programs", 0)
             )
 
             data.append(merged_data)

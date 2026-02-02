@@ -107,7 +107,7 @@ def process_data(data):
     df = pd.DataFrame(data)
 
     # Sum the values in the second and third columns, and store the result in 'Program Correctness'
-    df['Program Correctness'] = df['Output for DeliveryMax Summary'] + df['Output for Top 5 of 10 programs']
+    df['Program Correctness'] = df['Output for DeliveryMax Summary'] + df['Output for Top 5 of 15 programs']
     # Sum the values in 'Program Correctness', 'Code Readability', 'Code Efficiency', 'Documentation', and 'Assignment Specifications'
     df['Total'] = df['Program Correctness'] + df['Code Readability'] + df['Code Efficiency'] + df['Documentation'] + df['Assignment Specifications']
 
