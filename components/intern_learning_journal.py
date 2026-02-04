@@ -1,3 +1,5 @@
+#intern_learning_journal.py
+
 import streamlit as st
 from huggingface_hub import InferenceClient
 from pypdf import PdfReader
@@ -112,9 +114,22 @@ if group_zip is not None:
                
                 collected_response = ""
 
+                #for chunk in stream:
+                #    collected_response += chunk.choices[0].delta.content
+                #    placeholder.text(collected_response.replace("{", " ").replace("}", " "))
+
                 for chunk in stream:
-                    collected_response += chunk.choices[0].delta.content
-                    placeholder.text(collected_response.replace("{", " ").replace("}", " "))
+                    if not chunk.choices:
+                        continue
+
+                    delta = chunk.choices[0].delta
+
+                    if hasattr(delta, "content") and delta.content:
+                        collected_response += delta.content
+                        placeholder.text(
+                            collected_response.replace("{", " ").replace("}", " ")
+        )
+
                 
                 # display response
                 #st.write(dict(collected_response))
@@ -134,32 +149,6 @@ if group_zip is not None:
             
         status.update(label="Report evaluation completed...", state="complete", expanded=True)
 
-                #-------- use hugging face API ------#
-                #with st.empty():
-                #    try:
-                #        stream = client.chat_completion(
-                #            model=model_id,
-                #            messages=st.session_state.msg_history,
-                #            temperature=0.2,
-                #            max_tokens=5524,
-                #            top_p=0.7,
-                #            stream=True
-                #            )
-                #        collected_response = ""
-                #        for chunk in stream:
-                #            if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-                #                collected_response += chunk.choices[0].delta.content
-                #                st.text(collected_response.replace('{','').replace('}','').replace("'",""))
-                #        
-                #        actual_dict = ast.literal_eval(collected_response)
-                #        data.append(actual_dict)
-                #        status.update(label="Report evaluation completed...", state="complete", expanded=False)
-                #    
-                #    except Exception as e:
-                #        st.error(e)
-        
-        #except Exception as e:
-        #    st.error(f"Error generating response: {e}")
         
         del st.session_state.msg_history
 
@@ -168,4 +157,4 @@ if group_zip is not None:
         df = process_data(data)
         st.dataframe(df)
 
-            
+
