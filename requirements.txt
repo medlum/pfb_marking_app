@@ -10,3 +10,4 @@ streamlit_extras
 pypandoc
 together
 mammoth
+xhtml2pdf
