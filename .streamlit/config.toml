@@ -1,4 +1,11 @@
-[theme]
-base="dark"
-backgroundColor="#0e162b"
+#[theme]
+#base="white"
+#backgroundColor="#0e162b"
 
+#[theme]
+#base="light"
+#primaryColor="#ffb7b2"            # Soft Coral (Buttons/Links)
+#backgroundColor="#fdfcf0"         # Warm Cream (Main Area)
+#secondaryBackgroundColor="#e1f7f5" # Pale Mint (Sidebar)
+#textColor="#4a4a4a"               # Deep Charcoal (Text readability)
+#font="sans serif"
