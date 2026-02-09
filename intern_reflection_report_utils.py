@@ -7,75 +7,223 @@ import streamlit as st
 from docx import Document
 from pypdf import PdfReader
 import mammoth
+from xhtml2pdf import pisa
+import io
+import uuid
+
+def inference_cost(usage, input_price, output_price):
+    """
+    usage: response.usage from Together SDK
+    prices: USD per 1M tokens
+    """
+    input_cost = usage.prompt_tokens / 1_000_000 * input_price
+    output_cost = usage.completion_tokens / 1_000_000 * output_price
+    return input_cost + output_cost
+
+
+
+STUDENT_ID_PATTERN = re.compile(r"\b[A-Za-z]\d{8}[A-Za-z]\b")
+
+def generate_sid():
+    return f"SID_{uuid.uuid4().hex[:8]}"
+
+
+def deidentify_text(text, student_name, sid, sid_map):
+    """
+    Replace student name and student ID with SID (case-insensitive for name)
+    """
+
+    # --- Case-insensitive replacement for student name ---
+    if student_name:
+        name_pattern = re.compile(re.escape(student_name), re.IGNORECASE)
+        text = name_pattern.sub(sid, text)
+
+    # --- Replace student IDs by pattern ---
+    matches = STUDENT_ID_PATTERN.findall(text)
+
+    for student_id in matches:
+        sid_map[sid]["student_id"] = student_id
+        text = text.replace(student_id, sid)
+
+    print(f"{student_name} ({''.join(matches)}) : {sid}")
+
+    return text
+
+def create_pdf_with_highlights(highlighted_html, student_name):
+    # Create a wrapper with some CSS for the PDF
+    html_content = f"""
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Helvetica, Arial, sans-serif; font-size: 11pt; color: #333; }}
+            .header {{ text-align: center; color: #4a4a4a; border-bottom: 1px solid #ccc; padding-bottom: 10px; }}
+            /* Ensure our suggestion boxes look good in the PDF */
+            .annotation-box {{ 
+                border-left: 3px solid #ffa500; 
+                padding: 10px; 
+                margin: 15px 0; 
+                background-color: #fff9e6; 
+            }}
+            .original {{ background-color: yellow; font-weight: bold; }}
+            .suggestion {{ color: #2e7d32; font-style: italic; }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Internship Learning Journal Evaluation</h1>
+            <p><strong>Student:</strong> {student_name}</p>
+        </div>
+        <div class="content">
+            {highlighted_html}
+        </div>
+    </body>
+    </html>
+    """
+    
+    result = io.BytesIO()
+    # Convert HTML to PDF
+    pisa_status = pisa.CreatePDF(io.StringIO(html_content), dest=result)
+    
+    if pisa_status.err:
+        return None
+    
+    result.seek(0)
+    return result
+
+def clean_feedback_text(feedback_text):
+    """
+    Removes the Original/Suggestion blocks from the feedback text
+    so the summary remains high-level.
+    """
+    import re
+    
+    # This pattern matches 'Original: "..."', 'Suggestion: "..."', 
+    # and any whitespace/newlines immediately following them.
+    pattern = r'Original:\s*["“].*?["”]\s*Suggestion:\s*["“].*?["”]\s*'
+    
+    # re.DOTALL ensures it catches everything even if spread across lines
+    cleaned_text = re.sub(pattern, "", feedback_text, flags=re.DOTALL)
+    
+    # Optional: Clean up triple newlines that might be left over
+    cleaned_text = re.sub(r'\n{3,}', '\n\n', cleaned_text).strip()
+    
+    return cleaned_text
+
+def highlight_original_sentences(report_text, feedback_text):
+    """
+    Finds pairs of Original/Suggestion in feedback and embeds 
+    the suggestion directly into the report text.
+    """
+    import re
+    
+    # Regex to find the pair: Original: "..." followed by Suggestion: "..."
+    # This handles standard (") and curly (“ ”) quotes
+    pattern = r'Original:\s*["“](.*?)["”].*?Suggestion:\s*["“](.*?)["”]'
+    
+    # finditer lets us loop through all matches found in the feedback
+    matches = re.finditer(pattern, feedback_text, re.DOTALL)
+    
+    highlighted_report = report_text
+    
+    for match in matches:
+        original = match.group(1).strip()
+        suggestion = match.group(2).strip()
+        
+        if original in highlighted_report:
+            # Create a 'callout' style HTML block
+            # The original is highlighted yellow, suggestion is in green italics below it
+            annotation_html = f"""
+            <div style="border-left: 3px solid #ffa500; padding-left: 10px; margin: 10px 0; background-color: #fff9e6; border-radius: 5px;">
+                <span style="background-color: #ffff00; color: black; font-weight: bold;">{original}</span><br>
+                <span style="color: #2e7d32; font-size: 0.85rem; font-style: italic;">
+                    <strong>💡 Suggestion:</strong> {suggestion}
+                </span>
+            </div>
+            """
+            # Replace the plain text with our new HTML block
+            highlighted_report = highlighted_report.replace(original, annotation_html)
+            
+    return highlighted_report
 
 def extract_and_read_files(zip_path):
-    # Define extraction path
-    #extract_folder = "extracted_files"
     extract_folder = st.session_state.user_id
-    #st.write("From intern_reflection_report_utils:", st.session_state.user_id)
 
     if Path(extract_folder).exists():
         shutil.rmtree(extract_folder)
 
-    # Extract ZIP file
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(extract_folder)
+        zip_ref.extractall(extract_folder)
 
     extracted_data = {}
+    sid_map = {}
 
-    for folder in Path(extract_folder).iterdir(): 
+    for folder in Path(extract_folder).iterdir():
+        if not folder.is_dir():
+            continue
 
-        if folder.is_dir():  
+        # --- Extract student name from folder ---
+        folder_name = str(folder.relative_to(extract_folder))
+        cleaned_text = re.sub(r"\b(BA|NP|PM|AM)\b", "", folder_name)
+        cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
+        student_name = " ".join(re.findall(r"\b[A-Z]+\b", cleaned_text))
 
-        # extract student name from the each subfolder
-        # which contains name as standard label from brightspace 
-            folder_name = str(folder.relative_to(extract_folder))
-            cleaned_text = re.sub(r"\b(BA|NP|PM|AM)\b", "", folder_name)
-            cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
-            student_name = " ".join(re.findall(r"\b[A-Z]+\b", cleaned_text))
+        sid = generate_sid()
+        sid_map[sid] = {"student_name": student_name, "student_id": None}
 
-            
-            for file in folder.glob("*.*"):
+        for file in folder.glob("*.*"):
+            if file.suffix.lower() == ".docx":
 
-                if file.suffix.lower() == ".docx":
-                    #doc = Document(file)
-                    #data = "\n".join([para.text for para in doc.paragraphs])
-                    #print(data)
-                    #data = [[cell.text for cell in row.cells] for table in doc.tables for row in table.rows]
+                def ignore_images(image):
+                    return {}
 
-                    def ignore_images(image):
-                        return {}
-                    
-                    result = mammoth.convert_to_html(file,convert_image=ignore_images)
-                    data = result.value
+                result = mammoth.convert_to_html(file, convert_image=ignore_images)
+                data = result.value
 
-                elif file.suffix.lower() == ".pdf":
-                    data = ""
-                    reader = PdfReader(file)
-                    for page in reader.pages:
-                        data += page.extract_text()
+            elif file.suffix.lower() == ".pdf":
+                data = ""
+                reader = PdfReader(file)
+                for page in reader.pages:
+                    data += page.extract_text()
 
-                else:
-                    st.error(".docx or .pdf files not found")
-            
-                if student_name not in extracted_data:
-                    # store values as a list with file extension and extracted data
-                    extracted_data[student_name] = [file.suffix.lower(), data]
-    
-    return extracted_data
+            else:
+                continue
 
-#extracted_contents = extract_and_read_files('sample_int6.zip')
-#for i in extracted_contents:
-#    st.write(extracted_contents[i])
+            # 🔐 De-identify content
+            data = deidentify_text(data, student_name, sid, sid_map)
 
-def process_data(data):
+            extracted_data[sid] = [file.suffix.lower(), data]
+
+    return extracted_data, sid_map
+
+def process_data(data, sid_map):
     # Convert list of dictionaries to DataFrame
     df = pd.DataFrame(data)
 
+    #--- Add SID as first column ---
+    df.insert(0, "SID", df["Student Name"])
+
+    # --- Re-identify + normalize name ---
+    df["Student Name"] = (
+        df["Student Name"]
+        .map(lambda sid: sid_map.get(sid, {}).get("student_name", sid))
+        .str.upper()
+    )
+
     # Sum the values in 'Program Correctness', 'Code Readability', 'Code Efficiency', 'Documentation', and 'Assignment Specifications'
-    df['Total'] = df['Introduction (4 marks)'] + df['OJT Plan (6 marks)'] + df['Analysis and reflection on 3 experiences (Total 30 marks)'] + df[ 'Showcase of accomplished task/achievement (20 marks)'] + df['Diversity and Inclusion (10 marks)'] + df['Influence of internship on future plan (20 marks)'] + df['Quality of writing (10 marks)']
+    df['Total'] = (
+                    df['Introduction (4 marks)'] + 
+                    df['OJT Plan (6 marks)'] + 
+                    df['Analysis and reflection on 3 experiences (Total 30 marks)'] + 
+                    df[ 'Showcase of accomplished task/achievement (20 marks)'] + 
+                    df['Diversity and Inclusion (10 marks)'] + 
+                    df['Influence of internship on future plan (20 marks)'] + 
+                    df['Quality of writing (10 marks)']
+                    )
+
     
-    cols = ['Student Name', 
+    cols = [
+            'SID',
+            'Student Name', 
             'Introduction (4 marks)', 
             'OJT Plan (6 marks)', 
             'Analysis and reflection on 3 experiences (Total 30 marks)', 

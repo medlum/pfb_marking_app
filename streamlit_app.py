@@ -1,3 +1,5 @@
+#pfb/streamlit_app.py
+
 import streamlit as st
 from utils_entry import *
 
@@ -64,7 +66,6 @@ if st.session_state.logged_in:
                 "Marking Components": [pfb_group_project,
                                     pfb_research_report, 
                                     pfb_drones_individual_assignment,
-                                    #pfb_individual_assignment, 
                                     intern_learning_journal,
                                     intern_reflection_report],
                                     

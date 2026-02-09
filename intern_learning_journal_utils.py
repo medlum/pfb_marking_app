@@ -8,29 +8,48 @@ import streamlit as st
 from docx import Document
 from pypdf import PdfReader
 import mammoth
-
-
-#def highlight_original_sentences(report_text, feedback_text):
-#    """
-#    Finds sentences labeled as 'Original: "..."' in feedback 
-#    and wraps them in a yellow span tag within the report text.
-#    """
-#    # Regex to find text between Original: " and the closing "
-#    # Supports both standard and curly quotes
-#    original_quotes = re.findall(r'Original:\s*["“](.*?)["”]', feedback_text)
-#    
-#    highlighted_report = report_text
-#    
-#    for quote in original_quotes:
-#        if quote.strip():
-#            # We use a span with a background color for a 'highlighter' effect
-#            highlight_tag = f'<span style="background-color: #ffff00; color: black; font-weight: bold;">{quote}</span>'
-#            highlighted_report = highlighted_report.replace(quote, highlight_tag)
-#            
-#    return highlighted_report
-
 from xhtml2pdf import pisa
 import io
+import uuid
+
+
+def inference_cost(usage, input_price, output_price):
+    """
+    usage: response.usage from Together SDK
+    prices: USD per 1M tokens
+    """
+    input_cost = usage.prompt_tokens / 1_000_000 * input_price
+    output_cost = usage.completion_tokens / 1_000_000 * output_price
+    return input_cost + output_cost
+
+
+
+STUDENT_ID_PATTERN = re.compile(r"\b[A-Za-z]\d{8}[A-Za-z]\b")
+
+def generate_sid():
+    return f"SID_{uuid.uuid4().hex[:8]}"
+
+
+def deidentify_text(text, student_name, sid, sid_map):
+    """
+    Replace student name and student ID with SID (case-insensitive for name)
+    """
+
+    # --- Case-insensitive replacement for student name ---
+    if student_name:
+        name_pattern = re.compile(re.escape(student_name), re.IGNORECASE)
+        text = name_pattern.sub(sid, text)
+
+    # --- Replace student IDs by pattern ---
+    matches = STUDENT_ID_PATTERN.findall(text)
+
+    for student_id in matches:
+        sid_map[sid]["student_id"] = student_id
+        text = text.replace(student_id, sid)
+
+    print(f"{student_name} ({''.join(matches)}) : {sid}")
+
+    return text
 
 def create_pdf_with_highlights(highlighted_html, student_name):
     # Create a wrapper with some CSS for the PDF
@@ -129,78 +148,92 @@ def highlight_original_sentences(report_text, feedback_text):
     return highlighted_report
 
 def extract_and_read_files(zip_path):
-    # Define extraction path
-    #extract_folder = "extracted_files"
     extract_folder = st.session_state.user_id
 
     if Path(extract_folder).exists():
         shutil.rmtree(extract_folder)
 
-    # Extract ZIP file
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(extract_folder)
+        zip_ref.extractall(extract_folder)
 
     extracted_data = {}
+    sid_map = {}
 
-    for folder in Path(extract_folder).iterdir(): 
+    for folder in Path(extract_folder).iterdir():
+        if not folder.is_dir():
+            continue
 
-        if folder.is_dir():  
+        # --- Extract student name from folder ---
+        folder_name = str(folder.relative_to(extract_folder))
+        cleaned_text = re.sub(r"\b(BA|NP|PM|AM)\b", "", folder_name)
+        cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
+        student_name = " ".join(re.findall(r"\b[A-Z]+\b", cleaned_text))
 
-        # extract student name from the each subfolder
-        # which contains name as standard label from brightspace 
-            folder_name = str(folder.relative_to(extract_folder))
-            cleaned_text = re.sub(r"\b(BA|NP|PM|AM)\b", "", folder_name)
-            cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
-            student_name = " ".join(re.findall(r"\b[A-Z]+\b", cleaned_text))
+        sid = generate_sid()
+        sid_map[sid] = {"student_name": student_name, "student_id": None}
 
-            
-            for file in folder.glob("*.*"):
+        for file in folder.glob("*.*"):
+            if file.suffix.lower() == ".docx":
 
-                if file.suffix.lower() == ".docx":
-                    #doc = Document(file)
-                    #data = "\n".join([para.text for para in doc.paragraphs])
-                    #data = [[cell.text for cell in row.cells] for table in doc.tables for row in table.rows]
+                def ignore_images(image):
+                    return {}
 
-                    def ignore_images(image):
-                        return {}
-                    
-                    result = mammoth.convert_to_html(file,convert_image=ignore_images)
-                    data = result.value
-                
-                elif file.suffix.lower() == ".pdf":
-                    data = ""
-                    reader = PdfReader(file)
-                    for page in reader.pages:
-                        data += page.extract_text()
+                result = mammoth.convert_to_html(file, convert_image=ignore_images)
+                data = result.value
 
-                else:
-                    st.error(".docx or .pdf files not found")
-            
-                if student_name not in extracted_data:
-                    # store values as a list with file extension and extracted data
-                    extracted_data[student_name] = [file.suffix.lower(), data]
-    
-    return extracted_data
+            elif file.suffix.lower() == ".pdf":
+                data = ""
+                reader = PdfReader(file)
+                for page in reader.pages:
+                    data += page.extract_text()
+
+            else:
+                continue
+
+            # 🔐 De-identify content
+            data = deidentify_text(data, student_name, sid, sid_map)
+
+            extracted_data[sid] = [file.suffix.lower(), data]
+
+    return extracted_data, sid_map
 
 
-def process_data(data):
-    # Convert list of dictionaries to DataFrame
+def process_data(data, sid_map):
     df = pd.DataFrame(data)
 
-    # Sum the values in 'Program Correctness', 'Code Readability', 'Code Efficiency', 'Documentation', and 'Assignment Specifications'
-    df['Total'] = df['Review and update progress on the OJT plan (10 marks)'] + df['Progress on achieving personal and professional goals (15 marks)'] + df['Reflection on skills acquired (Total: 60 marks)'] + df[ 'Quality of writing (15 marks)'] 
+    # --- Add SID as first column ---
+    df.insert(0, "SID", df["Student Name"])
 
-    
-    cols = ['Student Name', 
-            'Review and update progress on the OJT plan (10 marks)', 
-            'Progress on achieving personal and professional goals (15 marks)', 
-            'Reflection on skills acquired (Total: 60 marks)', 
-            'Quality of writing (15 marks)', 
-            'Total', 
-            'Feedback']
+    # --- Re-identify + normalize name ---
+    df["Student Name"] = (
+        df["Student Name"]
+        .map(lambda sid: sid_map.get(sid, {}).get("student_name", sid))
+        .str.upper()
+    )
+
+    # --- Compute total ---
+    df['Total'] = (
+        df['Review and update progress on the OJT plan (10 marks)'] +
+        df['Progress on achieving personal and professional goals (15 marks)'] +
+        df['Reflection on skills acquired (Total: 60 marks)'] +
+        df['Quality of writing (15 marks)']
+    )
+
+    cols = [
+        'SID',
+        'Student Name',
+        'Review and update progress on the OJT plan (10 marks)',
+        'Progress on achieving personal and professional goals (15 marks)',
+        'Reflection on skills acquired (Total: 60 marks)',
+        'Quality of writing (15 marks)',
+        'Total',
+        'Feedback'
+    ]
 
     return df[cols]
+
 #    - Incorporate explanations of the mark allocation within the feedback for each criterion.
+
 system_message = """
 1. Your task is to assess student written assignments using a structured marking rubric.
 
@@ -284,3 +317,4 @@ image_css = """
 </style>
 
 """
+

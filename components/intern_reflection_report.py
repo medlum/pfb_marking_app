@@ -38,7 +38,7 @@ with st.sidebar:
     group_zip = st.sidebar.file_uploader(":gray[Upload a zip file (by NPIS grouping level)]", type=['zip'], help='Zip file should contain students submission by NPIS grouping')
 
     #evaluate_btn = st.sidebar.button(":material/search_insights: Evaluate Report", type="primary")
-    
+    st.write(":grey[Data is de-identified using UUIDs prior to AI analysis. These randomized identifiers ensure privacy during cloud processing, while original identities are restored locally only during the final reporting stage.]")
     st.markdown(f'<span style="font-size:12px; color:gray;">{disclaimer_var}</span>', unsafe_allow_html=True)
     st.markdown(buymecoffee_btn_css, unsafe_allow_html=True)
     if st.button("☕ Buy me coffee"):
@@ -48,8 +48,12 @@ with st.sidebar:
 if group_zip is not None:
 
     data = []
+    # 1. Initialize a storage key at the top of your script (outside the loop)
+    if "evaluation_results" not in st.session_state:
+        st.session_state.evaluation_results = {}
 
-    extracted_contents = extract_and_read_files(group_zip)
+    #extracted_contents = extract_and_read_files(group_zip)
+    extracted_contents, sid_map = extract_and_read_files(group_zip)
 
     for key in extracted_contents:
 
@@ -62,11 +66,14 @@ if group_zip is not None:
         st.session_state.msg_history.append({"role": "system", 
                                             "content": f"Here are the marking rubrics: {rubric}"})
         
-        st.session_state.msg_history.append({"role": "user", 
-                                            "content": f"Mark the following report for student name: {key}" })
+        #st.session_state.msg_history.append({"role": "user", 
+        #                                    "content": f"Mark the following report for student name: {key}" })
         
         st.session_state.msg_history.append({"role": "user", 
-                                            "content": f"{extracted_contents[key][1]}" })
+                                            "content": f"Mark the following report for student identifier: {key}" })
+        
+        st.session_state.msg_history.append({"role": "user", 
+                                            "content": f"{extracted_contents[key]}" })
         
         st.session_state.msg_history.append({"role": "user", 
                                             "content": f"Mark the report with high standard and be stringent when awarding marks." })
@@ -74,85 +81,88 @@ if group_zip is not None:
 
         st.subheader(f":blue[{key}]")
 
-        with st.expander(f":grey[*Submitted report*]"):
-            
-            #st.write(extracted_contents[key][1])
-            st.markdown(extracted_contents[key][1], unsafe_allow_html=True)
 
-        #-------- use together API ------#
-        with st.status(f"Evaluating report...", expanded=True) as status:
-            
-            try:
-                placeholder = st.empty()
-                stream = client.chat.completions.create(
-                    model=model_id,
-                    messages=st.session_state.msg_history,
-                    temperature=0.2,
-                    max_tokens=5524,
-                    top_p=0.7,
-                    stream=True,
+        if key not in st.session_state.evaluation_results:
+            with st.spinner("Evaluating report..."):
+                
+                try:
+                    # -------- use together API (NON-STREAMING) -------- #
+                    response = client.chat.completions.create(
+                        model=model_id,
+                        messages=st.session_state.msg_history,
+                        temperature=0.2,
+                        max_tokens=5524,
+                        top_p=0.7,
+                        stream=False,   # ✅ important
                     )
 
-                collected_response = ""
+                    # 1️⃣ Get model output
+                    collected_response = response.choices[0].message.content
 
-                for chunk in stream:
-                    collected_response += chunk.choices[0].delta.content
-                    placeholder.text(collected_response.replace("{", " ").replace("}", " "))
-                
-                # display response
-                #st.text(collected_response)
+                    # (optional) display
+                    #st.write(collected_response.replace("{", " ").replace("}", " "))
 
-            except Exception as e:
-                st.error(f"Error generating response: {e}")
+                    # 2️⃣ Get token usage
+                    usage = response.usage
+                    print("Prompt tokens:", usage.prompt_tokens)
+                    print("Completion tokens:", usage.completion_tokens)
+                    print("Total tokens:", usage.total_tokens)
+
+                    #cost= inference_cost(usage=usage, input_price=0.30, output_price=0.30)
+                    #print(f"Inference Cost: ${cost:.6f}")
+
+                except Exception as e:
+                    st.error(f"Error generating response: {e}")
 
             try:
                 actual_dict = ast.literal_eval(collected_response)
                 data.append(actual_dict)
 
+                # 1. Get the raw feedback and the original report text
+                #feedback_str = actual_dict.get("Feedback", "")
+                #report_format = extracted_contents[key][0]
+                #report_body = extracted_contents[key][1]
+
+                feedback_raw = actual_dict.get("Feedback", "")
+                report_text = extracted_contents[key][1]
+
+                # 2. Apply highlighting
+                #highlighted_content = highlight_original_sentences(report_body, feedback_str)
+                highlighted_content = highlight_original_sentences(report_text, feedback_raw)
+
+                # 2. Clean the feedback string for the summary (removes the edits here)
+                clean_feedback = clean_feedback_text(feedback_raw)
+
+                # 3. Display the expander with highlighted content
+                with st.expander(f":grey[*Submitted report (Highlighted)*]"):
+                    # Use unsafe_allow_html=True to render the <span> tags
+                    st.markdown(highlighted_content, unsafe_allow_html=True)
+                    # Generate the PDF
+                    pdf_file = create_pdf_with_highlights(highlighted_content, key)
+                    
+                    if pdf_file:
+                        st.download_button(
+                            label="📥 Download Annotated PDF",
+                            data=pdf_file,
+                            file_name=f"Evaluation_{key}.pdf",
+                            mime="application/pdf"
+                        )                
+                    
+                # 4. Display the AI Feedback separately below it
+                st.markdown("### AI Feedback")
+                st.markdown(clean_feedback)
+            
+
             except Exception as e:
                 st.error(f"Error @ast.literal_eval(collected_response): {e}")
-            
-        status.update(label="Report evaluation completed...", state="complete", expanded=True)
-
-        #-------- use hugging face API ------#
-        #if evaluate_btn:
-#        try:
-#            with st.status("Evaluating report...", expanded=True) as status:
-#
-#                with st.empty():
-#
-#                    try:
-#                        stream = client.chat_completion(
-#                            model=model_id,
-#                            messages=st.session_state.msg_history,
-#                            temperature=0.2,
-#                            max_tokens=5524,
-#                            top_p=0.7,
-#                            stream=True
-#                            )
-#                        
-#                        collected_response = ""
-#                        
-#                        for chunk in stream:
-#                            if 'delta' in chunk.choices[0] and 'content' in chunk.choices[0].delta:
-#                                collected_response += chunk.choices[0].delta.content
-#                                st.text(collected_response.replace('{','').replace('}','').replace("'",""))
-#                        
-#                        actual_dict = ast.literal_eval(collected_response)
-#                        data.append(actual_dict)
-#                        status.update(label="Report evaluation completed...", state="complete", expanded=False)
-#                    
-#                    except Exception as e:
-#                        st.error(e)
-#
-#        except Exception as e:
-#            st.error(f"Error generating response: {e}")
         
-        del st.session_state.msg_history
+    
+    
+    del st.session_state.msg_history
 
     if data:
         st.subheader(f":orange[Marks Summary]")
-        df = process_data(data)
+        df = process_data(data,  sid_map)
         st.dataframe(df)
 
 
